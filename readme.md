@@ -151,7 +151,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 [issues-shield]: https://img.shields.io/github/issues/Mano-Liaoyan/Chip8Emulator.svg?style=for-the-badge
 [issues-url]: https://github.com/Mano-Liaoyan/Chip8Emulator/issues
 [license-shield]: https://img.shields.io/github/license/Mano-Liaoyan/Chip8Emulator.svg?style=for-the-badge
-[license-url]: https://github.com/Mano-Liaoyan/Chip8Emulator/blob/master/LICENSE.txt
+[license-url]: https://github.com/Mano-Liaoyan/Chip8Emulator/blob/master/License.txt
 [product-screenshot]: images/screenshot.png
 [avaloniaui-logo]: https://avaloniaui.net/img/brand.svg
 [dotnet-logo]: https://raw.githubusercontent.com/dotnet/brand/refs/heads/main/logo/dotnet-logo.svg
