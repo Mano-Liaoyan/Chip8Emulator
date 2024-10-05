@@ -1,5 +1,7 @@
-﻿using Avalonia;
-using System;
+﻿using System;
+using System.Collections.ObjectModel;
+
+using Avalonia;
 
 namespace Chip8Emulator;
 
@@ -17,5 +19,7 @@ internal sealed class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
+            .With(new Win32PlatformOptions
+                { RenderingMode = new Collection<Win32RenderingMode> { Win32RenderingMode.Wgl } })
             .LogToTrace();
 }
