@@ -153,5 +153,5 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 [license-shield]: https://img.shields.io/github/license/Mano-Liaoyan/Chip8Emulator.svg?style=for-the-badge
 [license-url]: https://github.com/Mano-Liaoyan/Chip8Emulator/blob/master/License.txt
 [product-screenshot]: images/screenshot.png
-[avaloniaui-logo]: https://avaloniaui.net/img/brand.svg
+[avaloniaui-logo]: https://avatars.githubusercontent.com/u/14075148?s=48
 [dotnet-logo]: https://raw.githubusercontent.com/dotnet/brand/refs/heads/main/logo/dotnet-logo.svg
