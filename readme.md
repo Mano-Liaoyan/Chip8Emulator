@@ -18,7 +18,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Mano-Liaoyan/Chip8Emulator">
-    <img src="Assets/logo.png" alt="Logo" width="180">
+    <img src="Chip8Emulator/Assets/logo.png" alt="Logo" width="180">
   </a>
 
 <h3 align="center">Chip8Emulator</h3>
