@@ -30,4 +30,10 @@
     <ItemGroup>
       <ProjectReference Include="..\OpenTKAvalonia\OpenTKAvalonia.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Update="IBM.ch8">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>
