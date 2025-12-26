@@ -1,4 +1,6 @@
-﻿using Avalonia;
+﻿using System.Runtime.InteropServices;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
@@ -54,7 +56,10 @@ public abstract class BaseTkOpenGlControl : OpenGlControlBase, ICustomHitTest
         KeyboardState.OnFrame();
         
         //Set up the aspect ratio so shapes aren't stretched.
-        GL.Viewport(0, 0, (int) Bounds.Width, (int) Bounds.Height);
+        //GL.Viewport(0, 0, (int) Bounds.Width, (int) Bounds.Height);
+
+        var (w, h) = GetPlatformSpecificBounds();
+        GL.Viewport(0, 0, w, h);
 
         //Tell our subclass to render
         if (Bounds.Width != 0 && Bounds.Height != 0)
@@ -65,6 +70,17 @@ public abstract class BaseTkOpenGlControl : OpenGlControlBase, ICustomHitTest
         //Schedule next UI update with avalonia
         Dispatcher.UIThread.Post(RequestNextFrameRendering, DispatcherPriority.Background);
     }
+    
+    private static readonly bool OnLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
+    private double? _renderScaling = null;
+    private double RenderScaling => (_renderScaling ??= TopLevel.GetTopLevel(this)?.RenderScaling)
+                                    ?? throw new PlatformNotSupportedException("Could not obtain TopLevel");
+    private (int width, int height) GetPlatformSpecificBounds()
+        => OnLinux
+            ? ((int)Bounds.Width, (int)Bounds.Height)
+            : (Math.Max(1, (int)(Bounds.Width * RenderScaling)),
+                Math.Max(1, (int)(Bounds.Height * RenderScaling)));
 
 
     protected sealed override void OnOpenGlInit(GlInterface gl)
