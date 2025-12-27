@@ -50,7 +50,7 @@ public class CPU
     private readonly Chip8Instruction[] tableE;
     private readonly Chip8Instruction[] tableF;
 
-    private readonly uint[] video = new uint[VIDEO_WIDTH * VIDEO_HEIGHT];
+    public readonly uint[] video = new uint[VIDEO_WIDTH * VIDEO_HEIGHT];
 
     private byte delayTimer;
 
@@ -59,14 +59,14 @@ public class CPU
     /// </summary>
     private ushort ir;
 
-    public ushort opcode;
+    private ushort opcode;
 
     /// <summary>
     ///     Program Counter
     /// </summary>
     private ushort pc;
 
-    public byte soundTimer;
+    private byte soundTimer;
 
     /// <summary>
     ///     Stack Pointer
@@ -218,7 +218,7 @@ public class CPU
     /// <summary>
     ///     JP address: Jump to location nnn
     /// </summary>
-    public void OP_1nnn()
+    private void OP_1nnn()
     {
         // Extract the lowest 12 bits from the 16-bit opcode
         ushort address = (ushort)(opcode & 0x0FFF);
@@ -229,7 +229,7 @@ public class CPU
     /// <summary>
     ///     Call subroutine at nnn
     /// </summary>
-    public void OP_2nnn()
+    private void OP_2nnn()
     {
         // Extract the lowest 12 bits from the 16-bit opcode
         ushort address = (ushort)(opcode & 0x0FFF);
@@ -242,7 +242,7 @@ public class CPU
     /// <summary>
     ///     Skip next instruction if Vx = kk
     /// </summary>
-    public void OP_3xkk()
+    private void OP_3xkk()
     {
         // Extract 'x' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -258,7 +258,7 @@ public class CPU
     /// <summary>
     ///     Skip next instruction if Vx != kk
     /// </summary>
-    public void OP_4xkk()
+    private void OP_4xkk()
     {
         // Extract 'x' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -274,7 +274,7 @@ public class CPU
     /// <summary>
     ///     Skip next instruction if Vx = Vy
     /// </summary>
-    public void OP_5xy0()
+    private void OP_5xy0()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -288,7 +288,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = kk
     /// </summary>
-    public void OP_6xkk()
+    private void OP_6xkk()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte kk = (byte)(opcode & 0x00FF);
@@ -299,7 +299,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = Vx + kk
     /// </summary>
-    public void OP_7xkk()
+    private void OP_7xkk()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte kk = (byte)(opcode & 0x00FF);
@@ -310,7 +310,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = Vy
     /// </summary>
-    public void OP_8xy0()
+    private void OP_8xy0()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte y = (byte)((opcode & 0x00F0) >> 4);
@@ -321,7 +321,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = Vx OR Vy
     /// </summary>
-    public void OP_8xy1()
+    private void OP_8xy1()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte y = (byte)((opcode & 0x00F0) >> 4);
@@ -332,7 +332,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = Vx AND Vy
     /// </summary>
-    public void OP_8xy2()
+    private void OP_8xy2()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte y = (byte)((opcode & 0x00F0) >> 4);
@@ -343,7 +343,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = Vx XOR Vy
     /// </summary>
-    public void OP_8xy3()
+    private void OP_8xy3()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte y = (byte)((opcode & 0x00F0) >> 4);
@@ -354,7 +354,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = Vx + Vy, set VF = carry
     /// </summary>
-    public void OP_8xy4()
+    private void OP_8xy4()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte y = (byte)((opcode & 0x00F0) >> 4);
@@ -372,7 +372,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = Vx - Vy, set VF = NOT borrow
     /// </summary>
-    public void OP_8xy5()
+    private void OP_8xy5()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte y = (byte)((opcode & 0x00F0) >> 4);
@@ -388,7 +388,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = Vx SHR 1
     /// </summary>
-    public void OP_8xy6()
+    private void OP_8xy6()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
 
@@ -401,7 +401,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = Vy - Vx, set VF = NOT borrow
     /// </summary>
-    public void OP_8xy7()
+    private void OP_8xy7()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte y = (byte)((opcode & 0x00F0) >> 4);
@@ -417,7 +417,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = Vx SHL 1
     /// </summary>
-    public void OP_8xyE()
+    private void OP_8xyE()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
 
@@ -432,7 +432,7 @@ public class CPU
     /// <summary>
     ///     Skip next instruction if Vx != Vy
     /// </summary>
-    public void OP_9xy0()
+    private void OP_9xy0()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -446,7 +446,7 @@ public class CPU
     /// <summary>
     ///     Set I = nnn
     /// </summary>
-    public void OP_Annn()
+    private void OP_Annn()
     {
         ushort address = (ushort)(opcode & 0x0FFF);
 
@@ -456,7 +456,7 @@ public class CPU
     /// <summary>
     ///     Set I = nnn
     /// </summary>
-    public void OP_Bnnn()
+    private void OP_Bnnn()
     {
         ushort address = (ushort)(opcode & 0x0FFF);
 
@@ -466,7 +466,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = random byte AND kk
     /// </summary>
-    public void OP_Cxkk()
+    private void OP_Cxkk()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte kk = (byte)(opcode & 0x00FF);
@@ -477,7 +477,7 @@ public class CPU
     /// <summary>
     ///     Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
     /// </summary>
-    public void OP_Dxyn()
+    private void OP_Dxyn()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte y = (byte)((opcode & 0x00F0) >> 4);
@@ -518,7 +518,7 @@ public class CPU
     /// <summary>
     ///     Skip next instruction if key with the value of Vx is pressed
     /// </summary>
-    public void OP_Ex9E()
+    private void OP_Ex9E()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -531,7 +531,7 @@ public class CPU
     /// <summary>
     ///     Skip next instruction if key with the value of Vx is not pressed
     /// </summary>
-    public void OP_ExA1()
+    private void OP_ExA1()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -544,7 +544,7 @@ public class CPU
     /// <summary>
     ///     Set Vx = delay timer value
     /// </summary>
-    public void OP_Fx07()
+    private void OP_Fx07()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -554,7 +554,7 @@ public class CPU
     /// <summary>
     ///     Wait for a key press, store the value of the key in Vx
     /// </summary>
-    public void OP_Fx0A()
+    private void OP_Fx0A()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -576,7 +576,7 @@ public class CPU
     /// <summary>
     ///     Set delay timer = Vx
     /// </summary>
-    public void OP_Fx15()
+    private void OP_Fx15()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -586,7 +586,7 @@ public class CPU
     /// <summary>
     ///     Set sound timer = Vx
     /// </summary>
-    public void OP_Fx18()
+    private void OP_Fx18()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -596,7 +596,7 @@ public class CPU
     /// <summary>
     ///     Set I = I + Vx
     /// </summary>
-    public void OP_Fx1E()
+    private void OP_Fx1E()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -606,7 +606,7 @@ public class CPU
     /// <summary>
     ///     Set I = location of sprite for digit Vx
     /// </summary>
-    public void OP_Fx29()
+    private void OP_Fx29()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((opcode & 0x0F00) >> 8);
@@ -618,7 +618,7 @@ public class CPU
     /// <summary>
     ///     Store BCD representation of Vx in memory locations I, I+1, and I+2
     /// </summary>
-    public void OP_Fx33()
+    private void OP_Fx33()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
         byte value = registers[x];
@@ -638,7 +638,7 @@ public class CPU
     /// <summary>
     ///     Store registers V0 through Vx in memory starting at location I
     /// </summary>
-    public void OP_Fx55()
+    private void OP_Fx55()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
 
@@ -648,7 +648,7 @@ public class CPU
     /// <summary>
     ///     Read registers V0 through Vx from memory starting at location I
     /// </summary>
-    public void OP_Fx65()
+    private void OP_Fx65()
     {
         byte x = (byte)((opcode & 0x0F00) >> 8);
 
