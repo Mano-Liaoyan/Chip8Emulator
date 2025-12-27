@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Chip8Emulator;
 
-public class EasyNotifyPropertyChanged
+public class EasyNotifyPropertyChanged : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
