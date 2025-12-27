@@ -3,18 +3,30 @@
         xmlns:vm="using:Chip8Emulator.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:chip8Emulator="clr-namespace:Chip8Emulator"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Chip8Emulator.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/logo.png"
         Title="Chip8Emulator">
-
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
+    <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
+    <Grid ColumnDefinitions="400,Auto,*">
+        <Panel Grid.Column="0" Background="#ccc">
+            <Button HorizontalAlignment="Center" Click="ShowHideControl">Show/Hide OpenGL control</Button>
+        </Panel>
+        <GridSplitter
+            Grid.Column="1"
+            Width="2"
+            ResizeDirection="Columns"
+            Background="#ccc" />
+        <Panel Grid.Column="2" IsVisible="{Binding ShowOpenGlControl}">
+            <chip8Emulator:CubeRenderingTkOpenGlControl Focusable="True" />
+        </Panel>
+    </Grid>
 </Window>

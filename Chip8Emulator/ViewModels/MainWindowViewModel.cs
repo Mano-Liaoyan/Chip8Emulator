@@ -1,9 +1,27 @@
-﻿namespace Chip8Emulator.ViewModels;
+﻿using System;
+using System.ComponentModel;
 
-public partial class MainWindowViewModel : ViewModelBase
+namespace Chip8Emulator.ViewModels;
+
+public partial class MainWindowViewModel : EasyNotifyPropertyChanged
 {
-#pragma warning disable CA1822 // Mark members as static
-    // ReSharper disable once MemberCanBeMadeStatic.Global
-    public string Greeting => "Welcome to Avalonia!";
-#pragma warning restore CA1822 // Mark members as static
+    public MainWindowViewModel()
+    {
+        PropertyChanged += PropertyChangedHandler;
+    }
+
+    public bool ShowOpenGlControl
+    {
+        get;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    } = true;
+
+    private void PropertyChangedHandler(object? sender, PropertyChangedEventArgs e)
+    {
+        Console.WriteLine($"{e.PropertyName} changed by {sender} to {ShowOpenGlControl}.");
+    }
 }
