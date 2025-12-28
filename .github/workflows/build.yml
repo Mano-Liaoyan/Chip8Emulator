@@ -1,0 +1,48 @@
+name: Build
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            archive-name: Chip8Emulator-win-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+            archive-name: Chip8Emulator-linux-x64
+          - os: ubuntu-latest
+            rid: linux-arm64
+            archive-name: Chip8Emulator-linux-arm64
+          - os: macos-latest
+            rid: osx-arm64
+            archive-name: Chip8Emulator-osx-arm64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Publish
+      run: dotnet publish Chip8Emulator/Chip8Emulator.csproj -c Release -r ${{ matrix.rid }} --self-contained true -o publish/${{ matrix.rid }}
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.archive-name }}
+        path: publish/${{ matrix.rid }}

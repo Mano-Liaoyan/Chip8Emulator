@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            bin-name: Chip8Emulator.exe
+            platform: win-x64
+            extension: .exe
+          - os: ubuntu-latest
+            rid: linux-x64
+            bin-name: Chip8Emulator
+            platform: linux-x64
+            extension: ""
+          - os: ubuntu-latest
+            rid: linux-arm64
+            bin-name: Chip8Emulator
+            platform: linux-arm64
+            extension: ""
+          - os: macos-latest
+            rid: osx-arm64
+            bin-name: Chip8Emulator
+            platform: osx-arm64
+            extension: ""
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Publish
+      run: dotnet publish Chip8Emulator/Chip8Emulator.csproj -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o publish/${{ matrix.rid }}
+
+    - name: Prepare Artifact
+      shell: bash
+      run: |
+        VERSION="${{ github.ref_name }}"
+        # If triggered by workflow_dispatch on a branch, ref_name might be the branch name
+        # If it's a tag, it will be the tag name (e.g., v1.0.0)
+        FILENAME="Chip8Emulator-${VERSION}-${{ matrix.platform }}${{ matrix.extension }}"
+        mv publish/${{ matrix.rid }}/${{ matrix.bin-name }} ./${FILENAME}
+        echo "filename=${FILENAME}" >> $GITHUB_ENV
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.filename }}
+        path: ${{ env.filename }}
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          generate_release_notes: true
