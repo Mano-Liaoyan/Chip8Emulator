@@ -66,7 +66,7 @@ jobs:
           PUBLISH_DIR="publish/${{ matrix.rid }}"
           
           # We construct the bundle outside the publish dir to keep it clean
-          DMG_FILENAME="Chip8Emulator-${VERSION}-${{ matrix.platform }}.dmg"
+          ARCHIVE_FILENAME="Chip8Emulator-${VERSION}-${{ matrix.platform }}.tar.gz"
           BUNDLE_NAME="${APP_NAME}.app"
           
           mkdir -p "${BUNDLE_NAME}/Contents/MacOS"
@@ -97,9 +97,9 @@ jobs:
           # Ensure execution permission
           chmod +x "${BUNDLE_NAME}/Contents/MacOS/${APP_NAME}"
           
-          # Create DMG
-          hdiutil create -volname "Chip8Emulator" -srcfolder "${BUNDLE_NAME}" -ov -format UDZO "${DMG_FILENAME}"
-          echo "filename=${DMG_FILENAME}" >> $GITHUB_ENV
+          # Create Tarball
+          tar -czf "${ARCHIVE_FILENAME}" "${BUNDLE_NAME}"
+          echo "filename=${ARCHIVE_FILENAME}" >> $GITHUB_ENV
         fi
 
     - name: Upload Artifact

@@ -98,12 +98,12 @@ jobs:
           # Ensure execution permission
           chmod +x "${FINAL_BUNDLE_PATH}/Contents/MacOS/${APP_NAME}"
           
-          # Create DMG
-          hdiutil create -volname "${APP_NAME}" -srcfolder "${FINAL_BUNDLE_PATH}" -ov -format UDZO "${{ matrix.archive-name }}.dmg"
+          # Create Tarball
+          tar -czf "${{ matrix.archive-name }}.tar.gz" -C "$(dirname "${FINAL_BUNDLE_PATH}")" "$(basename "${FINAL_BUNDLE_PATH}")"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.archive-name }}
           path: |
-            ${{ matrix.os == 'macos-latest' && format('{0}.dmg', matrix.archive-name) || format('publish/{0}', matrix.rid) }}
+            ${{ matrix.os == 'macos-latest' && format('{0}.tar.gz', matrix.archive-name) || format('publish/{0}', matrix.rid) }}
