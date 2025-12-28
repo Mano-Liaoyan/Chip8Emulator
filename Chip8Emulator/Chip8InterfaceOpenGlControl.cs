@@ -26,6 +26,7 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
     private double _cpuAccumulator;
     private double _timerAccumulator;
+    private bool IsRomLoaded;
 
     private long lastCycleTime;
     private int shaderProgram;
@@ -39,7 +40,7 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
     {
         Console.WriteLine("UI: Creating OpenGLControl");
         Cpu = new CPU();
-        Cpu.LoadROM("opcode.ch8");
+        // Cpu.LoadROM("opcode.ch8");
         stopwatch = Stopwatch.StartNew();
     }
 
@@ -48,6 +49,7 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
     public void LoadRom(string path)
     {
         Cpu.LoadROM(path);
+        IsRomLoaded = true;
     }
 
     protected override void OpenTkInit()
@@ -120,6 +122,8 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
     protected override void OpenTkRender()
     {
+        if (!IsRomLoaded) return;
+
         // 1. Emulation Timing Logic
         ProcessInput();
         long currentTime = stopwatch.ElapsedMilliseconds;
