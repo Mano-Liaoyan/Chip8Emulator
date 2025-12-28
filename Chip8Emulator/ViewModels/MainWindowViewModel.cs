@@ -38,9 +38,9 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
         PropertyChanged += PropertyChangedHandler;
     }
 
-    public ObservableCollection<RegisterItem> Registers { get; } = new();
-    public ObservableCollection<RegisterItem> Keypad { get; } = new();
-    public ObservableCollection<string> Stack { get; } = new();
+    public ObservableCollection<RegisterItem> Registers { get; } = [];
+    public ObservableCollection<RegisterItem> Keypad { get; } = [];
+    public ObservableCollection<string> Stack { get; } = [];
 
     public bool ShowOpenGlControl
     {

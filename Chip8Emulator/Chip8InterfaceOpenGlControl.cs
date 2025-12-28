@@ -9,7 +9,10 @@ namespace Chip8Emulator;
 
 public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 {
-    private readonly int cycleDelay;
+    private const double CpuFrequency = 700.0;
+    private const double TimerFrequency = 60.0;
+    private const double CpuPeriod = 2000.0 / CpuFrequency;
+    private const double TimerPeriod = 1000.0 / TimerFrequency;
     private readonly Stopwatch stopwatch;
 
     private readonly float[] vertices =
@@ -20,6 +23,9 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         1.0f, -1.0f, 1.0f, 1.0f, // Bottom Right
         1.0f, 1.0f, 1.0f, 0.0f // Top Right
     ];
+
+    private double _cpuAccumulator;
+    private double _timerAccumulator;
 
     private long lastCycleTime;
     private int shaderProgram;
@@ -34,7 +40,6 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         Console.WriteLine("UI: Creating OpenGLControl");
         Cpu = new CPU();
         Cpu.LoadROM("opcode.ch8");
-        cycleDelay = 1;
         stopwatch = Stopwatch.StartNew();
     }
 
@@ -118,11 +123,25 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         // 1. Emulation Timing Logic
         ProcessInput();
         long currentTime = stopwatch.ElapsedMilliseconds;
+        double deltaTime = currentTime - lastCycleTime;
+        lastCycleTime = currentTime;
 
-        if (currentTime - lastCycleTime >= cycleDelay)
+        // Cap deltaTime to avoid spiral of death
+        if (deltaTime > 100) deltaTime = 100;
+
+        _cpuAccumulator += deltaTime;
+        _timerAccumulator += deltaTime;
+
+        while (_cpuAccumulator >= CpuPeriod)
         {
             Cpu.Cycle();
-            lastCycleTime = currentTime;
+            _cpuAccumulator -= CpuPeriod;
+        }
+
+        while (_timerAccumulator >= TimerPeriod)
+        {
+            Cpu.UpdateTimers();
+            _timerAccumulator -= TimerPeriod;
         }
 
 

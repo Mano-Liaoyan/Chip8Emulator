@@ -146,7 +146,7 @@ public class CPU
         Opcode = 0;
         I = 0;
         SP = 0;
-        DelayTimer = 3;
+        DelayTimer = 0;
         SoundTimer = 0;
 
         Array.Clear(memory, 0, memory.Length);
@@ -194,7 +194,10 @@ public class CPU
 
         // Decode & Execute: Use the first nibble to jump into the table
         table[(Opcode & 0xF000) >> 12]();
+    }
 
+    public void UpdateTimers()
+    {
         // Decrement the delay timer if it's been set
         if (DelayTimer > 0) DelayTimer--;
 
