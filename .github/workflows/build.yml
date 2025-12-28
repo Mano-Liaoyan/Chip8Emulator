@@ -39,8 +39,44 @@ jobs:
       - name: Publish
         run: dotnet publish Chip8Emulator/Chip8Emulator.csproj -c Release -r ${{ matrix.rid }} --self-contained true -o publish/${{ matrix.rid }}
 
+      - name: Package macOS App
+        if: matrix.os == 'macos-latest'
+        run: |
+          # Create bundle structure
+          mkdir -p "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/MacOS"
+          mkdir -p "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/Resources"
+          
+          # Copy Info.plist
+          cp packaging/macos/Info.plist "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/"
+          
+          # Generate ICNS icon
+          mkdir icon.iconset
+          sips -z 16 16     Chip8Emulator/Assets/logo.png --out icon.iconset/icon_16x16.png
+          sips -z 32 32     Chip8Emulator/Assets/logo.png --out icon.iconset/icon_16x16@2x.png
+          sips -z 32 32     Chip8Emulator/Assets/logo.png --out icon.iconset/icon_32x32.png
+          sips -z 64 64     Chip8Emulator/Assets/logo.png --out icon.iconset/icon_32x32@2x.png
+          sips -z 128 128   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_128x128.png
+          sips -z 256 256   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_128x128@2x.png
+          sips -z 256 256   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_256x256.png
+          sips -z 512 512   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_256x256@2x.png
+          sips -z 512 512   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_512x512.png
+          sips -z 1024 1024 Chip8Emulator/Assets/logo.png --out icon.iconset/icon_512x512@2x.png
+          iconutil -c icns icon.iconset
+          cp icon.icns "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/Resources/"
+          
+          # Move published files to bundle
+          # We move everything from the publish directory except the .app itself
+          mv publish/${{ matrix.rid }}/* "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/MacOS/" 2>/dev/null || true
+          
+          # Ensure execution permission
+          chmod +x "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/MacOS/Chip8Emulator"
+          
+          # Create DMG
+          hdiutil create -volname "Chip8Emulator" -srcfolder "publish/${{ matrix.rid }}/Chip8Emulator.app" -ov -format UDZO "${{ matrix.archive-name }}.dmg"
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.archive-name }}
-          path: publish/${{ matrix.rid }}
+          path: |
+            ${{ matrix.os == 'macos-latest' && format('{0}.dmg', matrix.archive-name) || format('publish/{0}', matrix.rid) }}
