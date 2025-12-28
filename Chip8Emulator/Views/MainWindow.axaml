@@ -8,7 +8,7 @@
         x:Class="Chip8Emulator.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/logo.png"
-        Title="Chip8Emulator">
+        Title="{Binding WindowTitle}">
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -17,16 +17,17 @@
 
     <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
     <Grid ColumnDefinitions="400,Auto,*">
-        <Panel Grid.Column="0" Background="#ccc">
+        <StackPanel Grid.Column="0" Background="#ccc" Spacing="10" VerticalAlignment="Center">
             <Button HorizontalAlignment="Center" Click="ShowHideControl">Show/Hide OpenGL control</Button>
-        </Panel>
+            <Button HorizontalAlignment="Center" Click="LoadRom_Click">Load ROM</Button>
+        </StackPanel>
         <GridSplitter
             Grid.Column="1"
             Width="2"
             ResizeDirection="Columns"
             Background="#ccc" />
         <Panel Grid.Column="2" IsVisible="{Binding ShowOpenGlControl}">
-            <chip8Emulator:Chip8InterfaceOpenGlControl Focusable="True" />
+            <chip8Emulator:Chip8InterfaceOpenGlControl x:Name="Chip8OpenGlControl" Focusable="True" />
         </Panel>
     </Grid>
 </Window>

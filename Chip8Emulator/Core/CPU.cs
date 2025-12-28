@@ -75,9 +75,7 @@ public class CPU
 
     public CPU()
     {
-        pc = startAddress;
         _random = new Random();
-        for (ushort i = 0; i < fontset.Length; ++i) memory[fontsetStartAddress + i] = fontset[i];
 
         // Initialize the arrays
         table = new Chip8Instruction[0xF + 1];
@@ -133,9 +131,29 @@ public class CPU
         tableF[0x33] = OP_Fx33;
         tableF[0x55] = OP_Fx55;
         tableF[0x65] = OP_Fx65;
+
+        Reset();
     }
 
-// Helper Table methods
+    private void Reset()
+    {
+        pc = startAddress;
+        opcode = 0;
+        ir = 0;
+        sp = 0;
+        delayTimer = 0;
+        soundTimer = 0;
+
+        Array.Clear(memory, 0, memory.Length);
+        Array.Clear(registers, 0, registers.Length);
+        Array.Clear(stack, 0, stack.Length);
+        Array.Clear(video, 0, video.Length);
+        Array.Clear(keypad, 0, keypad.Length);
+
+        for (ushort i = 0; i < fontset.Length; ++i) memory[fontsetStartAddress + i] = fontset[i];
+    }
+
+    // Helper Table methods
     private void Table0()
     {
         table0[opcode & 0x000F]();
@@ -181,6 +199,7 @@ public class CPU
 
     public void LoadROM(string romPath)
     {
+        Reset();
         if (File.Exists(romPath))
         {
             byte[] rom = File.ReadAllBytes(romPath);

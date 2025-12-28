@@ -13,13 +13,13 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
     private readonly Stopwatch stopwatch;
 
     private readonly float[] vertices =
-    {
+    [
         // Positions    // TexCoords
         -1.0f, 1.0f, 0.0f, 0.0f, // Top Left
         -1.0f, -1.0f, 0.0f, 1.0f, // Bottom Left
         1.0f, -1.0f, 1.0f, 1.0f, // Bottom Right
         1.0f, 1.0f, 1.0f, 0.0f // Top Right
-    };
+    ];
 
     private long lastCycleTime;
     private int shaderProgram;
@@ -38,29 +38,36 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         stopwatch = Stopwatch.StartNew();
     }
 
+    public void LoadRom(string path)
+    {
+        cpu.LoadROM(path);
+    }
+
     protected override void OpenTkInit()
     {
         GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         // 1. Shaders
-        string vertexShaderSource = @"
-            #version 330 core
-            layout (location = 0) in vec2 aPos;
-            layout (location = 1) in vec2 aTexCoord;
-            out vec2 TexCoord;
-            void main() {
-                gl_Position = vec4(aPos, 0.0, 1.0);
-                TexCoord = aTexCoord;
-            }";
+        const string vertexShaderSource = """
+                                                      #version 330 core
+                                                      layout (location = 0) in vec2 aPos;
+                                                      layout (location = 1) in vec2 aTexCoord;
+                                                      out vec2 TexCoord;
+                                                      void main() {
+                                                          gl_Position = vec4(aPos, 0.0, 1.0);
+                                                          TexCoord = aTexCoord;
+                                                      }
+                                          """;
 
-        string fragmentShaderSource = @"
-            #version 330 core
-            out vec4 FragColor;
-            in vec2 TexCoord;
-            uniform sampler2D texture1;
-            void main() {
-                FragColor = texture(texture1, TexCoord);
-            }";
+        const string fragmentShaderSource = """
+                                                        #version 330 core
+                                                        out vec4 FragColor;
+                                                        in vec2 TexCoord;
+                                                        uniform sampler2D texture1;
+                                                        void main() {
+                                                            FragColor = texture(texture1, TexCoord);
+                                                        }
+                                            """;
 
         int vertexShader = GL.CreateShader(ShaderType.VertexShader);
         GL.ShaderSource(vertexShader, vertexShaderSource);

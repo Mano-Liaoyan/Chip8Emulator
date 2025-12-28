@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Chip8Emulator.ViewModels;
 
-public partial class MainWindowViewModel : EasyNotifyPropertyChanged
+public class MainWindowViewModel : EasyNotifyPropertyChanged
 {
     public MainWindowViewModel()
     {
@@ -20,8 +20,26 @@ public partial class MainWindowViewModel : EasyNotifyPropertyChanged
         }
     } = true;
 
+    public string WindowTitle
+    {
+        get;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    } = "Chip8Emulator";
+
     private void PropertyChangedHandler(object? sender, PropertyChangedEventArgs e)
     {
-        Console.WriteLine($"{e.PropertyName} changed by {sender} to {ShowOpenGlControl}.");
+        switch (e.PropertyName)
+        {
+            case nameof(ShowOpenGlControl):
+                Console.WriteLine($"{e.PropertyName} changed by {sender} to {ShowOpenGlControl}.");
+                break;
+            case nameof(WindowTitle):
+                Console.WriteLine($"{e.PropertyName} changed by {sender} to {WindowTitle}.");
+                break;
+        }
     }
 }
