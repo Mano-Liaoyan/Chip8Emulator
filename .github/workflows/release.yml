@@ -50,22 +50,62 @@ jobs:
       run: dotnet restore
 
     - name: Publish
-      run: dotnet publish Chip8Emulator/Chip8Emulator.csproj -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o publish/${{ matrix.rid }}
+      run: dotnet publish Chip8Emulator/Chip8Emulator.csproj -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -p:UseAppHost=true -o publish/${{ matrix.rid }}
 
     - name: Prepare Artifact
       shell: bash
       run: |
         VERSION="${{ github.ref_name }}"
-        # If triggered by workflow_dispatch on a branch, ref_name might be the branch name
-        # If it's a tag, it will be the tag name (e.g., v1.0.0)
-        FILENAME="Chip8Emulator-${VERSION}-${{ matrix.platform }}${{ matrix.extension }}"
-        mv publish/${{ matrix.rid }}/${{ matrix.bin-name }} ./${FILENAME}
-        echo "filename=${FILENAME}" >> $GITHUB_ENV
+        if [ "${{ matrix.os }}" != "macos-latest" ]; then
+          FILENAME="Chip8Emulator-${VERSION}-${{ matrix.platform }}${{ matrix.extension }}"
+          mv publish/${{ matrix.rid }}/${{ matrix.bin-name }} ./${FILENAME}
+          echo "filename=${FILENAME}" >> $GITHUB_ENV
+        else
+          # macOS App Bundling
+          APP_NAME="Chip8Emulator"
+          PUBLISH_DIR="publish/${{ matrix.rid }}"
+          
+          # We construct the bundle outside the publish dir to keep it clean
+          DMG_FILENAME="Chip8Emulator-${VERSION}-${{ matrix.platform }}.dmg"
+          BUNDLE_NAME="${APP_NAME}.app"
+          
+          mkdir -p "${BUNDLE_NAME}/Contents/MacOS"
+          mkdir -p "${BUNDLE_NAME}/Contents/Resources"
+          
+          # Copy Info.plist
+          cp packaging/macos/Info.plist "${BUNDLE_NAME}/Contents/Info.plist"
+          
+          # Generate ICNS icon
+          mkdir icon.iconset
+          sips -z 16 16     Chip8Emulator/Assets/logo.png --out icon.iconset/icon_16x16.png
+          sips -z 32 32     Chip8Emulator/Assets/logo.png --out icon.iconset/icon_16x16@2x.png
+          sips -z 32 32     Chip8Emulator/Assets/logo.png --out icon.iconset/icon_32x32.png
+          sips -z 64 64     Chip8Emulator/Assets/logo.png --out icon.iconset/icon_32x32@2x.png
+          sips -z 128 128   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_128x128.png
+          sips -z 256 256   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_128x128@2x.png
+          sips -z 256 256   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_256x256.png
+          sips -z 512 512   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_256x256@2x.png
+          sips -z 512 512   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_512x512.png
+          sips -z 1024 1024 Chip8Emulator/Assets/logo.png --out icon.iconset/icon_512x512@2x.png
+          iconutil -c icns icon.iconset
+          cp icon.icns "${BUNDLE_NAME}/Contents/Resources/icon.icns"
+          
+          # Copy published files
+          # Note: for release we used PublishSingleFile=true so it should be just one file mostly, but we copy all just in case
+          cp -a "${PUBLISH_DIR}/." "${BUNDLE_NAME}/Contents/MacOS/"
+          
+          # Ensure execution permission
+          chmod +x "${BUNDLE_NAME}/Contents/MacOS/${APP_NAME}"
+          
+          # Create DMG
+          hdiutil create -volname "Chip8Emulator" -srcfolder "${BUNDLE_NAME}" -ov -format UDZO "${DMG_FILENAME}"
+          echo "filename=${DMG_FILENAME}" >> $GITHUB_ENV
+        fi
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.filename }}
+        name: ${{ matrix.platform }}
         path: ${{ env.filename }}
 
   release:

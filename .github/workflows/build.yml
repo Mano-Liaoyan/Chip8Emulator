@@ -37,17 +37,27 @@ jobs:
         run: dotnet restore
 
       - name: Publish
-        run: dotnet publish Chip8Emulator/Chip8Emulator.csproj -c Release -r ${{ matrix.rid }} --self-contained true -o publish/${{ matrix.rid }}
+        run: dotnet publish Chip8Emulator/Chip8Emulator.csproj -c Release -r ${{ matrix.rid }} --self-contained true -p:UseAppHost=true -o publish/${{ matrix.rid }}
 
       - name: Package macOS App
         if: matrix.os == 'macos-latest'
         run: |
+          # Define variables
+          APP_NAME="Chip8Emulator"
+          PUBLISH_DIR="publish/${{ matrix.rid }}"
+          # Avalonia docs say to put .app in same dir as publish or elsewhere. We put it inside publish for now to act as grouping, or better, separate.
+          # Let's keep it clean: helper var for bundle path
+          BUNDLE_PATH="publish/${{ matrix.rid }}/${APP_NAME}.app"
+          
+          # Clean up any previous bundle
+          rm -rf "${BUNDLE_PATH}"
+          
           # Create bundle structure
-          mkdir -p "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/MacOS"
-          mkdir -p "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/Resources"
+          mkdir -p "${BUNDLE_PATH}/Contents/MacOS"
+          mkdir -p "${BUNDLE_PATH}/Contents/Resources"
           
           # Copy Info.plist
-          cp packaging/macos/Info.plist "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/"
+          cp packaging/macos/Info.plist "${BUNDLE_PATH}/Contents/Info.plist"
           
           # Generate ICNS icon
           mkdir icon.iconset
@@ -62,17 +72,34 @@ jobs:
           sips -z 512 512   Chip8Emulator/Assets/logo.png --out icon.iconset/icon_512x512.png
           sips -z 1024 1024 Chip8Emulator/Assets/logo.png --out icon.iconset/icon_512x512@2x.png
           iconutil -c icns icon.iconset
-          cp icon.icns "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/Resources/"
+          cp icon.icns "${BUNDLE_PATH}/Contents/Resources/icon.icns"
           
-          # Move published files to bundle
-          # We move everything from the publish directory except the .app itself
-          mv publish/${{ matrix.rid }}/* "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/MacOS/" 2>/dev/null || true
+          # Copy all content from publish directory to Contents/MacOS
+          # Note: We must NOT copy the .app itself if it resides in PUBLISH_DIR (which it does not yet, we are creating it)
+          # But since we set BUNDLE_PATH to be inside publish/${{ matrix.rid }}, we should be careful.
+          # Actually, 'dotnet publish' output is already in PUBLISH_DIR.
+          # To avoid recursion if we put .app inside publish dir, we should create .app OUTSIDE first or filter.
+          # Better: Create .app in the parent directory of publish/rid, or just separate.
+          # Let's create it in 'packaging/macos/output' or similar to be safe, then move it?
+          # Or just use "find" excluding the app as before, OR simplify:
+          
+          # Docs say: cp -a "$PUBLISH_OUTPUT_DIRECTORY" "$APP_NAME/Contents/MacOS"
+          # This works perfectly if APP_NAME is NOT inside PUBLISH_OUTPUT_DIRECTORY.
+          # Let's change BUNDLE_PATH to be outside.
+          
+          FINAL_BUNDLE_PATH="${{ matrix.archive-name }}.app"
+          mkdir -p "${FINAL_BUNDLE_PATH}/Contents/MacOS"
+          mkdir -p "${FINAL_BUNDLE_PATH}/Contents/Resources"
+          cp packaging/macos/Info.plist "${FINAL_BUNDLE_PATH}/Contents/Info.plist"
+          cp icon.icns "${FINAL_BUNDLE_PATH}/Contents/Resources/icon.icns"
+          
+          cp -a "${PUBLISH_DIR}/." "${FINAL_BUNDLE_PATH}/Contents/MacOS/"
           
           # Ensure execution permission
-          chmod +x "publish/${{ matrix.rid }}/Chip8Emulator.app/Contents/MacOS/Chip8Emulator"
+          chmod +x "${FINAL_BUNDLE_PATH}/Contents/MacOS/${APP_NAME}"
           
           # Create DMG
-          hdiutil create -volname "Chip8Emulator" -srcfolder "publish/${{ matrix.rid }}/Chip8Emulator.app" -ov -format UDZO "${{ matrix.archive-name }}.dmg"
+          hdiutil create -volname "${APP_NAME}" -srcfolder "${FINAL_BUNDLE_PATH}" -ov -format UDZO "${{ matrix.archive-name }}.dmg"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
