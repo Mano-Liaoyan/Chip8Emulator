@@ -131,6 +131,40 @@
                 </StackPanel>
             </Border>
 
+            <!-- Keymap -->
+            <Border BorderBrush="#444" BorderThickness="1" CornerRadius="4" Padding="10" Background="#333">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="KEYPAD STATE" Foreground="#888" FontWeight="Bold" FontSize="12" />
+                    <ItemsControl ItemsSource="{Binding Keypad}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="4" Rows="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <!-- Bind 'active' class to IsActive boolean -->
+                                <Border Margin="2" CornerRadius="4" Padding="5" Classes.active="{Binding IsActive}">
+                                    <Border.Styles>
+                                        <!-- Default Style -->
+                                        <Style Selector="Border">
+                                            <Setter Property="Background" Value="#444"/>
+                                        </Style>
+                                        <!-- Active Style -->
+                                        <Style Selector="Border.active">
+                                            <Setter Property="Background" Value="#4CAF50"/>
+                                        </Style>
+                                    </Border.Styles>
+                                    <TextBlock Text="{Binding Name}" Foreground="White" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                               FontWeight="Bold"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
             <!-- Registers and Stack Side-by-Side -->
             <Grid ColumnDefinitions="*, 10, *">
 

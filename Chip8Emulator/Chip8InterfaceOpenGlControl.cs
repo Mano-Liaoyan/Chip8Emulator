@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Avalonia.Input;
 using Chip8Emulator.Core;
 using OpenTK.Graphics.OpenGL;
 using OpenTKAvalonia;
@@ -8,8 +9,6 @@ namespace Chip8Emulator;
 
 public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 {
-    private readonly CPU cpu;
-    public CPU Cpu => cpu;
     private readonly int cycleDelay;
     private readonly Stopwatch stopwatch;
 
@@ -33,15 +32,17 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
     public Chip8InterfaceOpenGlControl()
     {
         Console.WriteLine("UI: Creating OpenGLControl");
-        cpu = new CPU();
-        cpu.LoadROM("opcode.ch8");
+        Cpu = new CPU();
+        Cpu.LoadROM("opcode.ch8");
         cycleDelay = 1;
         stopwatch = Stopwatch.StartNew();
     }
 
+    public CPU Cpu { get; }
+
     public void LoadRom(string path)
     {
-        cpu.LoadROM(path);
+        Cpu.LoadROM(path);
     }
 
     protected override void OpenTkInit()
@@ -115,11 +116,12 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
     protected override void OpenTkRender()
     {
         // 1. Emulation Timing Logic
+        ProcessInput();
         long currentTime = stopwatch.ElapsedMilliseconds;
 
         if (currentTime - lastCycleTime >= cycleDelay)
         {
-            cpu.Cycle();
+            Cpu.Cycle();
             lastCycleTime = currentTime;
         }
 
@@ -132,7 +134,7 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
         // Upload the video buffer
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-            64, 32, 0, PixelFormat.Rgba, PixelType.UnsignedByte, cpu.video);
+            64, 32, 0, PixelFormat.Rgba, PixelType.UnsignedByte, Cpu.video);
 
         GL.BindVertexArray(vaoHandle);
         GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
@@ -144,5 +146,28 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         GL.DeleteProgram(shaderProgram);
         GL.DeleteBuffer(vboHandle);
         GL.DeleteVertexArray(vaoHandle);
+    }
+
+    private void ProcessInput()
+    {
+        Cpu.SetKey(0x1, KeyboardState.IsKeyDown(Key.D1));
+        Cpu.SetKey(0x2, KeyboardState.IsKeyDown(Key.D2));
+        Cpu.SetKey(0x3, KeyboardState.IsKeyDown(Key.D3));
+        Cpu.SetKey(0xC, KeyboardState.IsKeyDown(Key.D4));
+
+        Cpu.SetKey(0x4, KeyboardState.IsKeyDown(Key.Q));
+        Cpu.SetKey(0x5, KeyboardState.IsKeyDown(Key.W));
+        Cpu.SetKey(0x6, KeyboardState.IsKeyDown(Key.E));
+        Cpu.SetKey(0xD, KeyboardState.IsKeyDown(Key.R));
+
+        Cpu.SetKey(0x7, KeyboardState.IsKeyDown(Key.A));
+        Cpu.SetKey(0x8, KeyboardState.IsKeyDown(Key.S));
+        Cpu.SetKey(0x9, KeyboardState.IsKeyDown(Key.D));
+        Cpu.SetKey(0xE, KeyboardState.IsKeyDown(Key.F));
+
+        Cpu.SetKey(0xA, KeyboardState.IsKeyDown(Key.Z));
+        Cpu.SetKey(0x0, KeyboardState.IsKeyDown(Key.X));
+        Cpu.SetKey(0xB, KeyboardState.IsKeyDown(Key.C));
+        Cpu.SetKey(0xF, KeyboardState.IsKeyDown(Key.V));
     }
 }

@@ -33,7 +33,7 @@ public class CPU
 
     private readonly Random _random;
 
-    private readonly byte[] keypad = new byte[16];
+    public readonly byte[] Keypad = new byte[16];
 
     private readonly byte[] memory = new byte[4096];
 
@@ -51,6 +51,11 @@ public class CPU
     private readonly Chip8Instruction[] tableF;
 
     public readonly uint[] video = new uint[VIDEO_WIDTH * VIDEO_HEIGHT];
+
+    public void SetKey(int index, bool pressed)
+    {
+        Keypad[index] = (byte)(pressed ? 1 : 0);
+    }
 
     public CPU()
     {
@@ -148,7 +153,7 @@ public class CPU
         Array.Clear(Registers, 0, Registers.Length);
         Array.Clear(Stack, 0, Stack.Length);
         Array.Clear(video, 0, video.Length);
-        Array.Clear(keypad, 0, keypad.Length);
+        Array.Clear(Keypad, 0, Keypad.Length);
 
         for (ushort i = 0; i < fontset.Length; ++i) memory[fontsetStartAddress + i] = fontset[i];
     }
@@ -543,7 +548,7 @@ public class CPU
         byte x = (byte)((Opcode & 0x0F00) >> 8);
         byte key = Registers[x];
 
-        if (keypad[key] != 0)
+        if (Keypad[key] != 0)
             PC += 2;
     }
 
@@ -556,7 +561,7 @@ public class CPU
         byte x = (byte)((Opcode & 0x0F00) >> 8);
         byte key = Registers[x];
 
-        if (keypad[key] == 0)
+        if (Keypad[key] == 0)
             PC += 2;
     }
 
@@ -580,7 +585,7 @@ public class CPU
         bool keyPressed = false;
 
         for (byte i = 0; i < 16; i++)
-            if (keypad[i] != 0)
+            if (Keypad[i] != 0)
             {
                 Registers[x] = i;
                 keyPressed = true;
