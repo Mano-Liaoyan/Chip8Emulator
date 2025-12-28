@@ -9,6 +9,7 @@ namespace Chip8Emulator;
 public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 {
     private readonly CPU cpu;
+    public CPU Cpu => cpu;
     private readonly int cycleDelay;
     private readonly Stopwatch stopwatch;
 

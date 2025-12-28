@@ -17,9 +17,193 @@
 
     <!-- <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
     <Grid ColumnDefinitions="400,Auto,*">
-        <StackPanel Grid.Column="0" Background="#ccc" Spacing="10" VerticalAlignment="Center">
-            <Button HorizontalAlignment="Center" Click="ShowHideControl">Show/Hide OpenGL control</Button>
-            <Button HorizontalAlignment="Center" Click="LoadRom_Click">Load ROM</Button>
+        <StackPanel Grid.Column="0" Spacing="15" Margin="10">
+            <!-- <TextBlock Text="CHIP-8 EMULATOR" Foreground="White" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,10"/> -->
+
+            <!-- Controls -->
+            <Border BorderBrush="#444" BorderThickness="1" CornerRadius="4" Padding="10" Background="#333">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="CONTROLS" Foreground="#888" FontWeight="Bold" FontSize="12" />
+                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Click="LoadRom_Click"
+                            Background="#444" Foreground="White">
+                        LOAD ROM
+                    </Button>
+                    <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Click="ShowHideControl" Background="#444" Foreground="White">
+                        TOGGLE GPU
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <!-- CPU State -->
+            <Border BorderBrush="#444" BorderThickness="1" CornerRadius="4" Padding="10" Background="#333">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="CPU STATE" Foreground="#888" FontWeight="Bold" FontSize="12" />
+
+                    <!-- Dashboard Grid -->
+                    <Grid ColumnDefinitions="*, *" RowDefinitions="*, *, *" Margin="0,5">
+
+                        <!-- PC -->
+                        <Border Grid.Row="0" Grid.Column="0" Background="#383838" CornerRadius="4" Padding="10"
+                                Margin="0,0,5,5">
+                            <StackPanel>
+                                <TextBlock Text="PROGRAM COUNTER" Foreground="#888" FontSize="9" FontWeight="Bold" />
+                                <TextBlock Text="{Binding ProgramCounter}" Foreground="#4CAF50"
+                                           FontFamily="Consolas, Monospace" FontSize="18" FontWeight="Bold"
+                                           Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Opcode -->
+                        <Border Grid.Row="0" Grid.Column="1" Background="#383838" CornerRadius="4" Padding="10"
+                                Margin="5,0,0,5">
+                            <StackPanel>
+                                <TextBlock Text="OPCODE" Foreground="#888" FontSize="9" FontWeight="Bold" />
+                                <TextBlock Text="{Binding Opcode}" Foreground="#FFC107"
+                                           FontFamily="Consolas, Monospace" FontSize="18" FontWeight="Bold"
+                                           Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Index I -->
+                        <Border Grid.Row="1" Grid.Column="0" Background="#383838" CornerRadius="4" Padding="10"
+                                Margin="0,5,5,5">
+                            <StackPanel>
+                                <TextBlock Text="INDEX REGISTER (I)" Foreground="#888" FontSize="9"
+                                           FontWeight="Bold" />
+                                <TextBlock Text="{Binding IndexRegister}" Foreground="#2196F3"
+                                           FontFamily="Consolas, Monospace" FontSize="18" FontWeight="Bold"
+                                           Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- SP -->
+                        <Border Grid.Row="1" Grid.Column="1" Background="#383838" CornerRadius="4" Padding="10"
+                                Margin="5,5,0,5">
+                            <StackPanel>
+                                <TextBlock Text="STACK POINTER" Foreground="#888" FontSize="9" FontWeight="Bold" />
+                                <TextBlock Text="{Binding StackPointer}" Foreground="#E91E63"
+                                           FontFamily="Consolas, Monospace" FontSize="18" FontWeight="Bold"
+                                           Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Delay Timer -->
+                        <Border Grid.Row="2" Grid.Column="0" Background="#383838" CornerRadius="4" Padding="10"
+                                Margin="0,5,5,0">
+                            <StackPanel>
+                                <TextBlock Text="DELAY TIMER" Foreground="#888" FontSize="9" FontWeight="Bold" />
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{Binding DelayTimer}" Foreground="#FFF"
+                                               FontFamily="Consolas, Monospace" FontSize="18" FontWeight="Bold"
+                                               Margin="0,2,0,0" />
+                                    <TextBlock Grid.Column="1" Text="DT" Foreground="#555" FontSize="10"
+                                               VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                                </Grid>
+                                <!-- Simple Visual Indicator (Red line if active) -->
+                                <!-- Since we bind a string, we can't easily convert to double for ProgressBar without converter. 
+                                         Visual line is enough for now or maybe later advanced binding. -->
+                                <Border Background="#444" Height="2" Margin="0,5,0,0" CornerRadius="1">
+                                    <Border Background="#FFF" HorizontalAlignment="Left" Width="20" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Sound Timer -->
+                        <Border Grid.Row="2" Grid.Column="1" Background="#383838" CornerRadius="4" Padding="10"
+                                Margin="5,5,0,0">
+                            <StackPanel>
+                                <TextBlock Text="SOUND TIMER" Foreground="#888" FontSize="9" FontWeight="Bold" />
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{Binding SoundTimer}" Foreground="#FFF"
+                                               FontFamily="Consolas, Monospace" FontSize="18" FontWeight="Bold"
+                                               Margin="0,2,0,0" />
+                                    <TextBlock Grid.Column="1" Text="ST" Foreground="#555" FontSize="10"
+                                               VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                                </Grid>
+                                <Border Background="#444" Height="2" Margin="0,5,0,0" CornerRadius="1">
+                                    <Border Background="#FFF" HorizontalAlignment="Left" Width="20" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Registers and Stack Side-by-Side -->
+            <Grid ColumnDefinitions="*, 10, *">
+
+                <!-- Registers -->
+                <Border Grid.Column="0" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Padding="10"
+                        Background="#333" VerticalAlignment="Top">
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="REGISTERS" Foreground="#888" FontWeight="Bold" FontSize="12"
+                                   Margin="0,0,0,5" />
+                        <ItemsControl ItemsSource="{Binding Registers}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" Rows="8" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#383838" CornerRadius="4" Padding="8" Margin="2">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <TextBlock Text="{Binding Name}" Foreground="#888" FontWeight="Bold"
+                                                       FontSize="11" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Value}" Foreground="#DDD"
+                                                       FontFamily="Consolas, Monospace" FontSize="14"
+                                                       FontWeight="Bold" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Stack -->
+                <!-- Stack -->
+                <Border Grid.Column="2" BorderBrush="#444" BorderThickness="1" CornerRadius="4" Padding="10"
+                        Background="#2A2A2A" VerticalAlignment="Stretch">
+                    <Grid RowDefinitions="Auto, *">
+                        <TextBlock Grid.Row="0" Text="STACK" Foreground="#888" FontWeight="Bold" FontSize="12"
+                                   HorizontalAlignment="Center" Margin="0,0,0,5" />
+
+                        <!-- Using a ScrollViewer in case the stack gets large -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding Stack}">
+                                <ItemsControl.Styles>
+                                    <Style Selector="ContentPresenter">
+                                        <Setter Property="(DockPanel.Dock)" Value="Bottom" />
+                                    </Style>
+                                </ItemsControl.Styles>
+
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <DockPanel LastChildFill="False" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#666" BorderThickness="1" CornerRadius="2"
+                                                Padding="5,2" Margin="0,2" Background="#444"
+                                                HorizontalAlignment="Stretch">
+                                            <TextBlock Text="{Binding}" Foreground="#BBB"
+                                                       FontFamily="Consolas, Monospace" FontSize="11"
+                                                       HorizontalAlignment="Center" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+            </Grid>
+
         </StackPanel>
         <GridSplitter
             Grid.Column="1"

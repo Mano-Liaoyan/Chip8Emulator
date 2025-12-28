@@ -37,12 +37,12 @@ public class CPU
 
     private readonly byte[] memory = new byte[4096];
 
-    private readonly byte[] registers = new byte[16];
+    public readonly byte[] Registers = new byte[16];
 
     /// <summary>
     ///     The stack
     /// </summary>
-    private readonly ushort[] stack = new ushort[16];
+    public readonly ushort[] Stack = new ushort[16];
 
     private readonly Chip8Instruction[] table;
     private readonly Chip8Instruction[] table0;
@@ -51,27 +51,6 @@ public class CPU
     private readonly Chip8Instruction[] tableF;
 
     public readonly uint[] video = new uint[VIDEO_WIDTH * VIDEO_HEIGHT];
-
-    private byte delayTimer;
-
-    /// <summary>
-    ///     Index Register
-    /// </summary>
-    private ushort ir;
-
-    private ushort opcode;
-
-    /// <summary>
-    ///     Program Counter
-    /// </summary>
-    private ushort pc;
-
-    private byte soundTimer;
-
-    /// <summary>
-    ///     Stack Pointer
-    /// </summary>
-    private byte sp;
 
     public CPU()
     {
@@ -135,18 +114,39 @@ public class CPU
         Reset();
     }
 
+    public byte DelayTimer { get; private set; }
+
+    /// <summary>
+    ///     Index Register
+    /// </summary>
+    public ushort I { get; private set; }
+
+    public ushort Opcode { get; private set; }
+
+    /// <summary>
+    ///     Program Counter
+    /// </summary>
+    public ushort PC { get; private set; }
+
+    public byte SoundTimer { get; private set; }
+
+    /// <summary>
+    ///     Stack Pointer
+    /// </summary>
+    public byte SP { get; private set; }
+
     private void Reset()
     {
-        pc = startAddress;
-        opcode = 0;
-        ir = 0;
-        sp = 0;
-        delayTimer = 0;
-        soundTimer = 0;
+        PC = startAddress;
+        Opcode = 0;
+        I = 0;
+        SP = 0;
+        DelayTimer = 3;
+        SoundTimer = 0;
 
         Array.Clear(memory, 0, memory.Length);
-        Array.Clear(registers, 0, registers.Length);
-        Array.Clear(stack, 0, stack.Length);
+        Array.Clear(Registers, 0, Registers.Length);
+        Array.Clear(Stack, 0, Stack.Length);
         Array.Clear(video, 0, video.Length);
         Array.Clear(keypad, 0, keypad.Length);
 
@@ -156,22 +156,22 @@ public class CPU
     // Helper Table methods
     private void Table0()
     {
-        table0[opcode & 0x000F]();
+        table0[Opcode & 0x000F]();
     }
 
     private void Table8()
     {
-        table8[opcode & 0x000F]();
+        table8[Opcode & 0x000F]();
     }
 
     private void TableE()
     {
-        tableE[opcode & 0x000F]();
+        tableE[Opcode & 0x000F]();
     }
 
     private void TableF()
     {
-        tableF[opcode & 0x00FF]();
+        tableF[Opcode & 0x00FF]();
     }
 
     private void OP_NULL()
@@ -182,19 +182,19 @@ public class CPU
     public void Cycle()
     {
         // Fetch: Read 2 bytes from memory and combine them into one 16-bit opcode
-        opcode = (ushort)((memory[pc] << 8) | memory[pc + 1]);
+        Opcode = (ushort)((memory[PC] << 8) | memory[PC + 1]);
 
         // Move PC forward before executing
-        pc += 2;
+        PC += 2;
 
         // Decode & Execute: Use the first nibble to jump into the table
-        table[(opcode & 0xF000) >> 12]();
+        table[(Opcode & 0xF000) >> 12]();
 
         // Decrement the delay timer if it's been set
-        if (delayTimer > 0) --delayTimer;
+        if (DelayTimer > 0) DelayTimer--;
 
         // Decrement the sound timer if it's been set
-        if (soundTimer > 0) --soundTimer;
+        if (SoundTimer > 0) SoundTimer--;
     }
 
     public void LoadROM(string romPath)
@@ -230,8 +230,8 @@ public class CPU
     /// </summary>
     private void OP_00EE()
     {
-        sp -= 1;
-        pc = stack[sp];
+        SP -= 1;
+        PC = Stack[SP];
     }
 
     /// <summary>
@@ -240,9 +240,9 @@ public class CPU
     private void OP_1nnn()
     {
         // Extract the lowest 12 bits from the 16-bit opcode
-        ushort address = (ushort)(opcode & 0x0FFF);
+        ushort address = (ushort)(Opcode & 0x0FFF);
 
-        pc = address;
+        PC = address;
     }
 
     /// <summary>
@@ -251,11 +251,11 @@ public class CPU
     private void OP_2nnn()
     {
         // Extract the lowest 12 bits from the 16-bit opcode
-        ushort address = (ushort)(opcode & 0x0FFF);
+        ushort address = (ushort)(Opcode & 0x0FFF);
 
-        stack[sp] = pc;
-        sp += 1;
-        pc = address;
+        Stack[SP] = PC;
+        SP += 1;
+        PC = address;
     }
 
     /// <summary>
@@ -264,14 +264,14 @@ public class CPU
     private void OP_3xkk()
     {
         // Extract 'x' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
 
         // Extract 'kk' (the 8-bit constant) from the last two nibbles
-        byte kk = (byte)(opcode & 0x00FF);
+        byte kk = (byte)(Opcode & 0x00FF);
 
-        if (registers[x] == kk)
+        if (Registers[x] == kk)
             // Skip the next 2-byte instruction
-            pc += 2;
+            PC += 2;
     }
 
     /// <summary>
@@ -280,14 +280,14 @@ public class CPU
     private void OP_4xkk()
     {
         // Extract 'x' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
 
         // Extract 'kk' (the 8-bit constant) from the last two nibbles
-        byte kk = (byte)(opcode & 0x00FF);
+        byte kk = (byte)(Opcode & 0x00FF);
 
-        if (registers[x] != kk)
+        if (Registers[x] != kk)
             // Skip the next 2-byte instruction
-            pc += 2;
+            PC += 2;
     }
 
     /// <summary>
@@ -296,12 +296,12 @@ public class CPU
     private void OP_5xy0()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte y = (byte)((opcode & 0x00F0) >> 4);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
 
-        if (registers[x] == registers[y])
+        if (Registers[x] == Registers[y])
             // Skip the next 2-byte instruction
-            pc += 2;
+            PC += 2;
     }
 
     /// <summary>
@@ -309,10 +309,10 @@ public class CPU
     /// </summary>
     private void OP_6xkk()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte kk = (byte)(opcode & 0x00FF);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte kk = (byte)(Opcode & 0x00FF);
 
-        registers[x] = kk;
+        Registers[x] = kk;
     }
 
     /// <summary>
@@ -320,10 +320,10 @@ public class CPU
     /// </summary>
     private void OP_7xkk()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte kk = (byte)(opcode & 0x00FF);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte kk = (byte)(Opcode & 0x00FF);
 
-        registers[x] += kk;
+        Registers[x] += kk;
     }
 
     /// <summary>
@@ -331,10 +331,10 @@ public class CPU
     /// </summary>
     private void OP_8xy0()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte y = (byte)((opcode & 0x00F0) >> 4);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
 
-        registers[x] = registers[y];
+        Registers[x] = Registers[y];
     }
 
     /// <summary>
@@ -342,10 +342,10 @@ public class CPU
     /// </summary>
     private void OP_8xy1()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte y = (byte)((opcode & 0x00F0) >> 4);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
 
-        registers[x] |= registers[y];
+        Registers[x] |= Registers[y];
     }
 
     /// <summary>
@@ -353,10 +353,10 @@ public class CPU
     /// </summary>
     private void OP_8xy2()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte y = (byte)((opcode & 0x00F0) >> 4);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
 
-        registers[x] &= registers[y];
+        Registers[x] &= Registers[y];
     }
 
     /// <summary>
@@ -364,10 +364,10 @@ public class CPU
     /// </summary>
     private void OP_8xy3()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte y = (byte)((opcode & 0x00F0) >> 4);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
 
-        registers[x] ^= registers[y];
+        Registers[x] ^= Registers[y];
     }
 
     /// <summary>
@@ -375,17 +375,17 @@ public class CPU
     /// </summary>
     private void OP_8xy4()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte y = (byte)((opcode & 0x00F0) >> 4);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
 
-        int sum = registers[x] + registers[y];
+        int sum = Registers[x] + Registers[y];
 
         if (sum > 255)
-            registers[0xF] = 1;
+            Registers[0xF] = 1;
         else
-            registers[0xF] = 0;
+            Registers[0xF] = 0;
 
-        registers[x] = (byte)(sum & 0xFF);
+        Registers[x] = (byte)(sum & 0xFF);
     }
 
     /// <summary>
@@ -393,15 +393,15 @@ public class CPU
     /// </summary>
     private void OP_8xy5()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte y = (byte)((opcode & 0x00F0) >> 4);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
 
-        if (registers[x] > registers[y])
-            registers[0xF] = 1;
+        if (Registers[x] > Registers[y])
+            Registers[0xF] = 1;
         else
-            registers[0xF] = 0;
+            Registers[0xF] = 0;
 
-        registers[x] -= registers[y];
+        Registers[x] -= Registers[y];
     }
 
     /// <summary>
@@ -409,12 +409,12 @@ public class CPU
     /// </summary>
     private void OP_8xy6()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
 
         // Save LSB in VF
-        registers[0xF] = (byte)(registers[x] & 0x1);
+        Registers[0xF] = (byte)(Registers[x] & 0x1);
 
-        registers[x] >>= 1;
+        Registers[x] >>= 1;
     }
 
     /// <summary>
@@ -422,15 +422,15 @@ public class CPU
     /// </summary>
     private void OP_8xy7()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte y = (byte)((opcode & 0x00F0) >> 4);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
 
-        if (registers[y] > registers[x])
-            registers[0xF] = 1;
+        if (Registers[y] > Registers[x])
+            Registers[0xF] = 1;
         else
-            registers[0xF] = 0;
+            Registers[0xF] = 0;
 
-        registers[x] = (byte)(registers[y] - registers[x]);
+        Registers[x] = (byte)(Registers[y] - Registers[x]);
     }
 
     /// <summary>
@@ -438,14 +438,14 @@ public class CPU
     /// </summary>
     private void OP_8xyE()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
 
         // Save the Most Significant Bit (MSB) in VF
         // 0x80 is 10000000 in binary. We mask it and shift it 7 places right 
         // to get a simple 0 or 1.
-        registers[0xF] = (byte)((registers[x] & 0x80) >> 7);
+        Registers[0xF] = (byte)((Registers[x] & 0x80) >> 7);
 
-        registers[x] <<= 1;
+        Registers[x] <<= 1;
     }
 
     /// <summary>
@@ -454,12 +454,12 @@ public class CPU
     private void OP_9xy0()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte y = (byte)((opcode & 0x00F0) >> 4);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
 
-        if (registers[x] != registers[y])
+        if (Registers[x] != Registers[y])
             // Skip the next 2-byte instruction
-            pc += 2;
+            PC += 2;
     }
 
     /// <summary>
@@ -467,9 +467,9 @@ public class CPU
     /// </summary>
     private void OP_Annn()
     {
-        ushort address = (ushort)(opcode & 0x0FFF);
+        ushort address = (ushort)(Opcode & 0x0FFF);
 
-        ir = address;
+        I = address;
     }
 
     /// <summary>
@@ -477,9 +477,9 @@ public class CPU
     /// </summary>
     private void OP_Bnnn()
     {
-        ushort address = (ushort)(opcode & 0x0FFF);
+        ushort address = (ushort)(Opcode & 0x0FFF);
 
-        pc = (ushort)(registers[0] + address);
+        PC = (ushort)(Registers[0] + address);
     }
 
     /// <summary>
@@ -487,10 +487,10 @@ public class CPU
     /// </summary>
     private void OP_Cxkk()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte kk = (byte)(opcode & 0x00FF);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte kk = (byte)(Opcode & 0x00FF);
 
-        registers[x] = (byte)(GetRandomByte() & kk);
+        Registers[x] = (byte)(GetRandomByte() & kk);
     }
 
     /// <summary>
@@ -498,18 +498,18 @@ public class CPU
     /// </summary>
     private void OP_Dxyn()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte y = (byte)((opcode & 0x00F0) >> 4);
-        byte height = (byte)(opcode & 0x000F);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
+        byte height = (byte)(Opcode & 0x000F);
 
-        byte xPositon = (byte)(registers[x] % VIDEO_WIDTH);
-        byte yPositon = (byte)(registers[y] % VIDEO_HEIGHT);
+        byte xPositon = (byte)(Registers[x] % VIDEO_WIDTH);
+        byte yPositon = (byte)(Registers[y] % VIDEO_HEIGHT);
 
-        registers[0xF] = 0;
+        Registers[0xF] = 0;
 
         for (ushort row = 0; row < height; ++row)
         {
-            byte spriteByte = memory[ir + row];
+            byte spriteByte = memory[I + row];
 
             for (ushort col = 0; col < 8; ++col)
             {
@@ -526,7 +526,7 @@ public class CPU
                 int screenIndex = (yPositon + row) * VIDEO_WIDTH + xPositon + col;
 
                 // Screen pixel is already on (0xFFFFFFFF) - Collision!
-                if (video[screenIndex] == 0xFFFFFFFF) registers[0xF] = 1;
+                if (video[screenIndex] == 0xFFFFFFFF) Registers[0xF] = 1;
 
                 // XOR the screen pixel (Invert it)
                 video[screenIndex] ^= 0xFFFFFFFF;
@@ -540,11 +540,11 @@ public class CPU
     private void OP_Ex9E()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte key = registers[x];
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte key = Registers[x];
 
         if (keypad[key] != 0)
-            pc += 2;
+            PC += 2;
     }
 
     /// <summary>
@@ -553,11 +553,11 @@ public class CPU
     private void OP_ExA1()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte key = registers[x];
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte key = Registers[x];
 
         if (keypad[key] == 0)
-            pc += 2;
+            PC += 2;
     }
 
     /// <summary>
@@ -566,8 +566,8 @@ public class CPU
     private void OP_Fx07()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        registers[x] = delayTimer;
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        Registers[x] = DelayTimer;
     }
 
     /// <summary>
@@ -576,20 +576,20 @@ public class CPU
     private void OP_Fx0A()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
         bool keyPressed = false;
 
         for (byte i = 0; i < 16; i++)
             if (keypad[i] != 0)
             {
-                registers[x] = i;
+                Registers[x] = i;
                 keyPressed = true;
                 break;
             }
 
         // If no key was pressed, move the PC back 2 bytes.
         // This causes the emulator to run this same instruction again on the next cycle.
-        if (!keyPressed) pc -= 2;
+        if (!keyPressed) PC -= 2;
     }
 
     /// <summary>
@@ -598,8 +598,8 @@ public class CPU
     private void OP_Fx15()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        delayTimer = registers[x];
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        DelayTimer = Registers[x];
     }
 
     /// <summary>
@@ -608,8 +608,8 @@ public class CPU
     private void OP_Fx18()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        soundTimer = registers[x];
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        SoundTimer = Registers[x];
     }
 
     /// <summary>
@@ -618,8 +618,8 @@ public class CPU
     private void OP_Fx1E()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        ir += registers[x];
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        I += Registers[x];
     }
 
     /// <summary>
@@ -628,10 +628,10 @@ public class CPU
     private void OP_Fx29()
     {
         // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
-        byte x = (byte)((opcode & 0x0F00) >> 8);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
         // We know the font characters are located at 0x50, and we know they’re five bytes each, so we can get the
         // address of the first byte of any character by taking an offset from the start address.
-        ir = (ushort)(fontsetStartAddress + 5 * registers[x]);
+        I = (ushort)(fontsetStartAddress + 5 * Registers[x]);
     }
 
     /// <summary>
@@ -639,19 +639,19 @@ public class CPU
     /// </summary>
     private void OP_Fx33()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
-        byte value = registers[x];
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
+        byte value = Registers[x];
 
         // Ones-place (e.g., if value is 157, this gets 7)
-        memory[ir + 2] = (byte)(value % 10);
+        memory[I + 2] = (byte)(value % 10);
         value /= 10;
 
         // Tens-place (e.g., if value is 15, this gets 5)
-        memory[ir + 1] = (byte)(value % 10);
+        memory[I + 1] = (byte)(value % 10);
         value /= 10;
 
         // Hundreds-place (e.g., if value is 1, this gets 1)
-        memory[ir] = (byte)(value % 10);
+        memory[I] = (byte)(value % 10);
     }
 
     /// <summary>
@@ -659,9 +659,9 @@ public class CPU
     /// </summary>
     private void OP_Fx55()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
 
-        for (byte i = 0; i <= x; ++i) memory[ir + i] = registers[i];
+        for (byte i = 0; i <= x; ++i) memory[I + i] = Registers[i];
     }
 
     /// <summary>
@@ -669,9 +669,9 @@ public class CPU
     /// </summary>
     private void OP_Fx65()
     {
-        byte x = (byte)((opcode & 0x0F00) >> 8);
+        byte x = (byte)((Opcode & 0x0F00) >> 8);
 
-        for (byte i = 0; i <= x; ++i) registers[i] = memory[ir + i];
+        for (byte i = 0; i <= x; ++i) Registers[i] = memory[I + i];
     }
 
     // Define the delegate type (Action is a built-in delegate for void functions with no params)

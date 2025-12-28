@@ -14,6 +14,13 @@ public partial class MainWindow : Window
     {
         DataContext = _viewModel = new MainWindowViewModel();
         InitializeComponent();
+
+        var timer = new Avalonia.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(30)
+        };
+        timer.Tick += (s, e) => _viewModel.UpdateCpuState(Chip8OpenGlControl.Cpu);
+        timer.Start();
     }
 
 
