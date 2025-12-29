@@ -58,6 +58,7 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
     protected override void OpenTkInit()
     {
+        Console.WriteLine("[Chip8] OpenTkInit started");
         GL.ClearColor(0.2f, 0.3f, 0.8f, 1.0f);
 
         // 1. Shaders

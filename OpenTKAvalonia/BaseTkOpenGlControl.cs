@@ -72,7 +72,14 @@ public abstract class BaseTkOpenGlControl : OpenGlControlBase, ICustomHitTest
         GL.Viewport(0, 0, w, h);
 
         //Tell our subclass to render
-        if (Bounds.Width != 0 && Bounds.Height != 0) OpenTkRender();
+        if (Bounds.Width != 0 && Bounds.Height != 0)
+        {
+            OpenTkRender();
+        }
+        else
+        {
+            Console.WriteLine($"[BaseTk] OnOpenGlRender skipped: Bounds is zero ({Bounds.Width}x{Bounds.Height})");
+        }
 
         //Schedule next UI update with avalonia
         Dispatcher.UIThread.Post(RequestNextFrameRendering, DispatcherPriority.Background);
@@ -86,17 +93,28 @@ public abstract class BaseTkOpenGlControl : OpenGlControlBase, ICustomHitTest
 
     protected sealed override void OnOpenGlInit(GlInterface gl)
     {
-        //Initialize the OpenTK<->Avalonia Bridge
-        _avaloniaTkContext = new AvaloniaTkContext(gl);
-        GL.LoadBindings(_avaloniaTkContext);
+        Console.WriteLine("[BaseTk] OnOpenGlInit started");
+        try
+        {
+            //Initialize the OpenTK<->Avalonia Bridge
+            _avaloniaTkContext = new AvaloniaTkContext(gl);
+            GL.LoadBindings(_avaloniaTkContext);
 
-        //Invoke the subclass' init function
-        OpenTkInit();
+            //Invoke the subclass' init function
+            OpenTkInit();
+            Console.WriteLine("[BaseTk] OnOpenGlInit finished successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BaseTk] OnOpenGlInit CRITICAL ERROR: {ex}");
+            throw;
+        }
     }
 
     //Simply call the subclass' teardown function
     protected sealed override void OnOpenGlDeinit(GlInterface gl)
     {
+        Console.WriteLine("[BaseTk] OnOpenGlDeinit called");
         OpenTkTeardown();
     }
 
