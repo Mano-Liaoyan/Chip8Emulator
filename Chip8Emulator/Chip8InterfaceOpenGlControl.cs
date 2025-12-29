@@ -48,6 +48,8 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
     public CPU Cpu { get; }
 
+    private long _frameCount;
+
     public void LoadRom(string path)
     {
         Cpu.LoadROM(path);
@@ -56,7 +58,7 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
     protected override void OpenTkInit()
     {
-        GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GL.ClearColor(0.2f, 0.3f, 0.8f, 1.0f);
 
         // 1. Shaders
         const string vertexShaderSource = """
@@ -162,6 +164,15 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
     protected override void OpenTkRender()
     {
+        _frameCount++;
+        if (_frameCount % 60 == 0)
+        {
+            Console.WriteLine($"[DEBUG] Render Frame {_frameCount}");
+        }
+
+        // 2. Rendering (Moved to top to force clear)
+        GL.Clear(ClearBufferMask.ColorBufferBit);
+
         if (!IsRomLoaded) return;
 
         // 1. Emulation Timing Logic
@@ -192,10 +203,6 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
             _soundPlayer?.Play();
         else
             _soundPlayer?.Stop();
-
-
-        // 2. Rendering
-        GL.Clear(ClearBufferMask.ColorBufferBit);
 
         GL.UseProgram(shaderProgram);
         GL.BindTexture(TextureTarget.Texture2D, textureHandle);
