@@ -97,6 +97,9 @@ jobs:
           
           # Ensure execution permission
           chmod +x "${FINAL_BUNDLE_PATH}/Contents/MacOS/${APP_NAME}"
+
+          # Ad-hoc code signing (required for Apple Silicon)
+          codesign --force --deep --sign - "${FINAL_BUNDLE_PATH}"
           
           # Create Tarball
           tar -czf "${{ matrix.archive-name }}.tar.gz" -C "$(dirname "${FINAL_BUNDLE_PATH}")" "$(basename "${FINAL_BUNDLE_PATH}")"

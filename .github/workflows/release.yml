@@ -96,6 +96,9 @@ jobs:
           
           # Ensure execution permission
           chmod +x "${BUNDLE_NAME}/Contents/MacOS/${APP_NAME}"
+
+          # Ad-hoc code signing (required for Apple Silicon)
+          codesign --force --deep --sign - "${BUNDLE_NAME}"
           
           # Create Tarball
           tar -czf "${ARCHIVE_FILENAME}" "${BUNDLE_NAME}"
