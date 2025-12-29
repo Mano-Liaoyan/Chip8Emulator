@@ -37,7 +37,7 @@ jobs:
         run: dotnet restore
 
       - name: Publish
-        run: dotnet publish Chip8Emulator/Chip8Emulator.csproj -c Release -r ${{ matrix.rid }} --self-contained true -p:UseAppHost=true -o publish/${{ matrix.rid }}
+        run: dotnet publish Chip8Emulator/Chip8Emulator.csproj -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -p:UseAppHost=true -o publish/${{ matrix.rid }}
 
       - name: Package macOS App
         if: matrix.os == 'macos-latest'
