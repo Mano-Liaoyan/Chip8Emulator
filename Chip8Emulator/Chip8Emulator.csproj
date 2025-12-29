@@ -27,28 +27,12 @@
         <PackageReference Include="OpenTK" Version="4.9.4"/>
         <PackageReference Include="OpenTK.Graphics" Version="4.9.4"/>
         <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.1"/>
-        <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.1"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="2.88.9"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\OpenTKAvalonia\OpenTKAvalonia.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <None Update="IBM.ch8">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="opcode.ch8">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="pong.ch8">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="tetris.ch8">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="brix.ch8">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
+    
 </Project>
