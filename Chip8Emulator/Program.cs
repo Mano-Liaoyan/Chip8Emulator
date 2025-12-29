@@ -19,6 +19,11 @@ internal static class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
+            .With(new X11PlatformOptions
+            {
+                // Force whitelist llvmpipe for virtual machines
+                GlxRendererBlacklist = []
+            })
             .With(new Win32PlatformOptions
                 { RenderingMode = new Collection<Win32RenderingMode> { Win32RenderingMode.Wgl } })
             .LogToTrace();
