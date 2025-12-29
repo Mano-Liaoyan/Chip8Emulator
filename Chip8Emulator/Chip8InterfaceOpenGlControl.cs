@@ -83,15 +83,18 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         int vertexShader = GL.CreateShader(ShaderType.VertexShader);
         GL.ShaderSource(vertexShader, vertexShaderSource);
         GL.CompileShader(vertexShader);
+        CheckShaderCompileStatus(vertexShader);
 
         int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
         GL.ShaderSource(fragmentShader, fragmentShaderSource);
         GL.CompileShader(fragmentShader);
+        CheckShaderCompileStatus(fragmentShader);
 
         shaderProgram = GL.CreateProgram();
         GL.AttachShader(shaderProgram, vertexShader);
         GL.AttachShader(shaderProgram, fragmentShader);
         GL.LinkProgram(shaderProgram);
+        CheckProgramLinkStatus(shaderProgram);
 
         GL.DetachShader(shaderProgram, vertexShader);
         GL.DetachShader(shaderProgram, fragmentShader);
@@ -121,6 +124,12 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
+        var error = GL.GetError();
+        if (error != ErrorCode.NoError)
+        {
+            Console.WriteLine($"[GL ERROR] OpenTkInit Error: {error}");
+        }
+
         try
         {
             _soundPlayer = new SoundPlayer();
@@ -128,6 +137,26 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         catch (Exception e)
         {
             Console.WriteLine($"Audio initialization failed: {e.Message}");
+        }
+    }
+
+    private void CheckShaderCompileStatus(int shader)
+    {
+        GL.GetShader(shader, ShaderParameter.CompileStatus, out int success);
+        if (success == 0)
+        {
+            string infoLog = GL.GetShaderInfoLog(shader);
+            Console.WriteLine($"[SHADER ERROR] Compilation failed: {infoLog}");
+        }
+    }
+
+    private void CheckProgramLinkStatus(int program)
+    {
+        GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int success);
+        if (success == 0)
+        {
+            string infoLog = GL.GetProgramInfoLog(program);
+            Console.WriteLine($"[SHADER ERROR] Linking failed: {infoLog}");
         }
     }
 
