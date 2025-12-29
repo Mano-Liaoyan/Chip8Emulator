@@ -25,6 +25,8 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
     ];
 
     private double _cpuAccumulator;
+
+    private SoundPlayer? _soundPlayer;
     private double _timerAccumulator;
     private bool IsRomLoaded;
 
@@ -118,6 +120,15 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+        try
+        {
+            _soundPlayer = new SoundPlayer();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Audio initialization failed: {e.Message}");
+        }
     }
 
     protected override void OpenTkRender()
@@ -148,6 +159,11 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
             _timerAccumulator -= TimerPeriod;
         }
 
+        if (Cpu.SoundTimer > 0)
+            _soundPlayer?.Play();
+        else
+            _soundPlayer?.Stop();
+
 
         // 2. Rendering
         GL.Clear(ClearBufferMask.ColorBufferBit);
@@ -169,6 +185,7 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         GL.DeleteProgram(shaderProgram);
         GL.DeleteBuffer(vboHandle);
         GL.DeleteVertexArray(vaoHandle);
+        _soundPlayer?.Dispose();
     }
 
     private void ProcessInput()

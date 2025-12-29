@@ -52,11 +52,6 @@ public class CPU
 
     public readonly uint[] video = new uint[VIDEO_WIDTH * VIDEO_HEIGHT];
 
-    public void SetKey(int index, bool pressed)
-    {
-        Keypad[index] = (byte)(pressed ? 1 : 0);
-    }
-
     public CPU()
     {
         _random = new Random();
@@ -139,6 +134,11 @@ public class CPU
     ///     Stack Pointer
     /// </summary>
     public byte SP { get; private set; }
+
+    public void SetKey(int index, bool pressed)
+    {
+        Keypad[index] = (byte)(pressed ? 1 : 0);
+    }
 
     private void Reset()
     {
