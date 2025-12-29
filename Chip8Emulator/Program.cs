@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-
+using System.Diagnostics;
 using Avalonia;
-
 using Avalonia.Logging;
 
 namespace Chip8Emulator;
@@ -15,16 +14,23 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        System.Diagnostics.Trace.Listeners.Add(new System.Diagnostics.ConsoleTraceListener());
+        Trace.Listeners.Add(new ConsoleTraceListener());
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     private static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+    {
+        return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
-            //.With(new Win32PlatformOptions
-            //    { RenderingMode = new Collection<Win32RenderingMode> { Win32RenderingMode.Wgl } })
+            .With(new X11PlatformOptions
+            {
+                // Force whitelist llvmpipe for virtual machines
+                GlxRendererBlacklist = []
+            })
+            .With(new Win32PlatformOptions
+                { RenderingMode = new Collection<Win32RenderingMode> { Win32RenderingMode.Wgl } })
             .LogToTrace(LogEventLevel.Verbose);
+    }
 }
