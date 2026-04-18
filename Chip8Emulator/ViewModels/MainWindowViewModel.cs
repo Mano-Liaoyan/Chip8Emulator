@@ -34,8 +34,6 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
         string[] labels = ["1", "2", "3", "C", "4", "5", "6", "D", "7", "8", "9", "E", "A", "0", "B", "F"];
 
         for (int i = 0; i < 16; i++) Keypad.Add(new RegisterItem { Name = labels[i], Value = "False" });
-
-        PropertyChanged += PropertyChangedHandler;
     }
 
     public ObservableCollection<RegisterItem> Registers { get; } = [];
@@ -157,19 +155,6 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
             if (Stack[i] == newVal) continue;
 
             Stack[i] = newVal;
-        }
-    }
-
-    private void PropertyChangedHandler(object? sender, PropertyChangedEventArgs e)
-    {
-        switch (e.PropertyName)
-        {
-            case nameof(ShowOpenGlControl):
-                Console.WriteLine($"{e.PropertyName} changed by {sender} to {ShowOpenGlControl}.");
-                break;
-            case nameof(WindowTitle):
-                Console.WriteLine($"{e.PropertyName} changed by {sender} to {WindowTitle}.");
-                break;
         }
     }
 

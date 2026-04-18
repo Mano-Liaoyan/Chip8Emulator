@@ -40,7 +40,6 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
     public Chip8InterfaceOpenGlControl()
     {
-        Console.WriteLine("UI: Creating OpenGLControl");
         Cpu = new CPU();
         // Cpu.LoadROM("opcode.ch8");
         stopwatch = Stopwatch.StartNew();
