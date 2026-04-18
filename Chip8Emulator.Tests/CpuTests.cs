@@ -39,4 +39,26 @@ public class CpuTests
         var cpu = CreateCpu(0x00, 0xEE); // RET
         Assert.Throws<InvalidOperationException>(() => cpu.Cycle());
     }
+
+    [Fact]
+    public void OP_Fx0A_DoesNotAdvance_UntilKeyReleased()
+    {
+        // 0xF00A = wait for key, store in V0
+        var cpu = CreateCpu(0xF0, 0x0A);
+
+        // Simulate key 3 pressed — should NOT advance yet (key still held)
+        cpu.SetKey(3, true);
+        cpu.Cycle();
+        Assert.Equal(0x200, cpu.PC); // re-executed (PC decremented back)
+
+        // Key still held — must still not advance
+        cpu.Cycle();
+        Assert.Equal(0x200, cpu.PC);
+
+        // Release key 3 — now it should store and advance
+        cpu.SetKey(3, false);
+        cpu.Cycle();
+        Assert.Equal(0x202, cpu.PC);
+        Assert.Equal(3, cpu.Registers[0]);
+    }
 }

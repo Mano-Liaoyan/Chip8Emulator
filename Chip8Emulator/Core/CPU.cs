@@ -32,6 +32,7 @@ public class CPU
     ];
 
     private readonly Random _random;
+    private int _waitingForKeyRelease = -1; // -1 = not waiting; 0-15 = waiting for this key to release
 
     public readonly byte[] Keypad = new byte[16];
 
@@ -154,6 +155,8 @@ public class CPU
         Array.Clear(Stack, 0, Stack.Length);
         Array.Clear(video, 0, video.Length);
         Array.Clear(Keypad, 0, Keypad.Length);
+
+        _waitingForKeyRelease = -1;
 
         for (ushort i = 0; i < fontset.Length; ++i) memory[fontsetStartAddress + i] = fontset[i];
     }
@@ -582,21 +585,34 @@ public class CPU
     /// </summary>
     private void OP_Fx0A()
     {
-        // Extract 'x' and 'y' (the register index) from the second nibble and shift it to the end
         byte x = (byte)((Opcode & 0x0F00) >> 8);
-        bool keyPressed = false;
 
-        for (byte i = 0; i < 16; i++)
-            if (Keypad[i] != 0)
+        // Phase 1: no key pressed yet — scan and wait
+        if (_waitingForKeyRelease == -1)
+        {
+            for (byte i = 0; i < 16; i++)
             {
-                Registers[x] = i;
-                keyPressed = true;
-                break;
+                if (Keypad[i] != 0)
+                {
+                    _waitingForKeyRelease = i;
+                    Registers[x] = i;
+                    break;
+                }
             }
+            // Whether a key was found or not, stay on this instruction
+            PC -= 2;
+            return;
+        }
 
-        // If no key was pressed, move the PC back 2 bytes.
-        // This causes the emulator to run this same instruction again on the next cycle.
-        if (!keyPressed) PC -= 2;
+        // Phase 2: key was pressed — wait for release
+        if (Keypad[_waitingForKeyRelease] != 0)
+        {
+            PC -= 2; // key still held, stay here
+            return;
+        }
+
+        // Key released — clear state and advance (PC stays at +2 from fetch)
+        _waitingForKeyRelease = -1;
     }
 
     /// <summary>
