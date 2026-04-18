@@ -235,6 +235,8 @@ public class CPU
     /// </summary>
     private void OP_00EE()
     {
+        if (SP == 0)
+            throw new InvalidOperationException("Stack underflow: RET with empty stack.");
         SP -= 1;
         PC = Stack[SP];
     }
@@ -255,9 +257,9 @@ public class CPU
     /// </summary>
     private void OP_2nnn()
     {
-        // Extract the lowest 12 bits from the 16-bit opcode
+        if (SP >= Stack.Length)
+            throw new InvalidOperationException("Stack overflow: CALL with full stack.");
         ushort address = (ushort)(Opcode & 0x0FFF);
-
         Stack[SP] = PC;
         SP += 1;
         PC = address;
