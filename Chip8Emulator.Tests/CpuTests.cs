@@ -111,4 +111,17 @@ public class CpuTests
         Assert.Equal(0b00000010, cpu.Registers[6]);
         Assert.Equal(1, cpu.Registers[0xF]); // MSB was 1
     }
+
+    [Fact]
+    public void OP_8xyE_WithShiftUsesVy_False_ShiftsVx()
+    {
+        var cpu = CreateCpu(0x86, 0x1E); // SHL V6, (V1 ignored)
+        cpu.Registers[6] = 0b10000001; // Vx: MSB=1 → VF=1, result=0b00000010
+        cpu.Registers[1] = 0b00001111; // V1 should be ignored
+        cpu.ShiftUsesVy = false;
+        cpu.Cycle();
+        Assert.Equal(0b00000010, cpu.Registers[6]);
+        Assert.Equal(1, cpu.Registers[0xF]); // MSB was 1
+        Assert.Equal(0b00001111, cpu.Registers[1]); // V1 untouched
+    }
 }
