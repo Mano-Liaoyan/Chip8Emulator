@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Chip8Emulator.Core;
 using Xunit;
 
@@ -24,11 +23,9 @@ public class CpuTests
     [Fact]
     public void OP_2nnn_AtMaxStack_ThrowsInvalidOperationException()
     {
-        var cpu = new CPU();
-        // CALL 0x200 — calls itself, filling the stack. ROM is 2 bytes: 0x22 0x00 = CALL 0x200
-        var rom = new List<byte>();
-        for (int i = 0; i < 16; i++) { rom.Add(0x22); rom.Add(0x00); } // 16x CALL 0x200
-        cpu.LoadROM(rom.ToArray());
+        // 0x2200 = CALL 0x200 — self-referential, so SP grows by 1 each cycle
+        // 16 cycles fill the stack; the 17th must throw
+        var cpu = CreateCpu(0x22, 0x00);
         Assert.Throws<InvalidOperationException>(() =>
         {
             for (int i = 0; i < 17; i++) cpu.Cycle();
