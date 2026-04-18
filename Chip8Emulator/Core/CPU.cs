@@ -207,17 +207,16 @@ public class CPU
 
     public void LoadROM(string romPath)
     {
-        Reset();
-        if (File.Exists(romPath))
-        {
-            byte[] rom = File.ReadAllBytes(romPath);
-
-            for (int i = 0; i < rom.Length && startAddress + i < memory.Length; i++) memory[startAddress + i] = rom[i];
-        }
-        else
-        {
+        if (!File.Exists(romPath))
             throw new FileNotFoundException($"ROM file not found: {romPath}");
-        }
+        LoadROM(File.ReadAllBytes(romPath));
+    }
+
+    public void LoadROM(ReadOnlySpan<byte> rom)
+    {
+        Reset();
+        for (int i = 0; i < rom.Length && startAddress + i < memory.Length; i++)
+            memory[startAddress + i] = rom[i];
     }
 
     private byte GetRandomByte()
