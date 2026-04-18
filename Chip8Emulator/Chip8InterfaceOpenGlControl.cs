@@ -157,12 +157,12 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
         ProcessInput();
 
+        long currentTime = stopwatch.ElapsedMilliseconds;
+        double deltaTime = currentTime - lastCycleTime;
+        lastCycleTime = currentTime;
+
         if (!IsPaused)
         {
-            long currentTime = stopwatch.ElapsedMilliseconds;
-            double deltaTime = currentTime - lastCycleTime;
-            lastCycleTime = currentTime;
-
             if (deltaTime > 100) deltaTime = 100;
 
             _cpuAccumulator += deltaTime;
