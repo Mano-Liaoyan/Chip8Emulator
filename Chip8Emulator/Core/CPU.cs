@@ -207,8 +207,6 @@ public class CPU
 
     public void LoadROM(string romPath)
     {
-        if (!File.Exists(romPath))
-            throw new FileNotFoundException($"ROM file not found: {romPath}");
         LoadROM(File.ReadAllBytes(romPath));
     }
 
