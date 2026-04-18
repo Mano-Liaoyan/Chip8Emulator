@@ -25,20 +25,18 @@ public class SoundPlayer : IDisposable
         // Sine wave: standard beep
         const int sampleRate = 44100;
         const double frequency = 440.0; // A4
-        const int lengthMs = 1000; // 1 second buffer, we will loop it
-        const int dataCount = sampleRate * lengthMs / 1000;
+        const int dataCount = sampleRate; // 1 second of mono samples
         short[] bufferData = new short[dataCount];
 
         for (int i = 0; i < dataCount; i++)
         {
             double angle = Math.PI * 2.0 * frequency * i / sampleRate;
-            // Amplitude 0.5 * short.MaxValue
             bufferData[i] = (short)(Math.Sin(angle) * (short.MaxValue * 0.5));
         }
 
         // 4. Create OpenAL Buffer
         _buffer = AL.GenBuffer();
-        AL.BufferData(_buffer, ALFormat.Stereo16, bufferData, sampleRate);
+        AL.BufferData(_buffer, ALFormat.Mono16, bufferData, sampleRate);
 
         // 5. Create OpenAL Source
         _source = AL.GenSource();
