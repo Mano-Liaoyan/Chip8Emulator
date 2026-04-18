@@ -106,6 +106,18 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
         set { field = value; OnPropertyChanged(); }
     } = "00";
 
+    public byte DelayTimerValue
+    {
+        get;
+        set { field = value; OnPropertyChanged(); }
+    }
+
+    public byte SoundTimerValue
+    {
+        get;
+        set { field = value; OnPropertyChanged(); }
+    }
+
     public void UpdateCpuState(CPU cpu)
     {
         ProgramCounter = cpu.PC.ToString("X4");
@@ -114,6 +126,8 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
         StackPointer = cpu.SP.ToString("X2");
         DelayTimer = cpu.DelayTimer.ToString("X2");
         SoundTimer = cpu.SoundTimer.ToString("X2");
+        DelayTimerValue = cpu.DelayTimer;
+        SoundTimerValue = cpu.SoundTimer;
 
         for (int i = 0; i < 16; i++)
         {

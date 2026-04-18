@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:chip8Emulator="clr-namespace:Chip8Emulator"
+        xmlns:conv="using:Chip8Emulator.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Chip8Emulator.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -106,11 +107,9 @@
                                         <TextBlock Grid.Column="1" Text="DT" Foreground="#555" FontSize="10"
                                                    VerticalAlignment="Bottom" Margin="0,0,0,4" />
                                     </Grid>
-                                    <!-- Simple Visual Indicator (Red line if active) -->
-                                    <!-- Since we bind a string, we can't easily convert to double for ProgressBar without converter. 
-                                         Visual line is enough for now or maybe later advanced binding. -->
-                                    <Border Background="#444" Height="2" Margin="0,5,0,0" CornerRadius="1">
-                                        <Border Background="#FFF" HorizontalAlignment="Left" Width="20" />
+                                    <Border Background="#444" Height="4" Margin="0,5,0,0" CornerRadius="2">
+                                        <Border Background="#4CAF50" HorizontalAlignment="Left" CornerRadius="2"
+                                                Width="{Binding DelayTimerValue, Converter={x:Static conv:TimerWidthConverter.Instance}}" />
                                     </Border>
                                 </StackPanel>
                             </Border>
@@ -127,8 +126,9 @@
                                         <TextBlock Grid.Column="1" Text="ST" Foreground="#555" FontSize="10"
                                                    VerticalAlignment="Bottom" Margin="0,0,0,4" />
                                     </Grid>
-                                    <Border Background="#444" Height="2" Margin="0,5,0,0" CornerRadius="1">
-                                        <Border Background="#FFF" HorizontalAlignment="Left" Width="20" />
+                                    <Border Background="#444" Height="4" Margin="0,5,0,0" CornerRadius="2">
+                                        <Border Background="#FF5722" HorizontalAlignment="Left" CornerRadius="2"
+                                                Width="{Binding SoundTimerValue, Converter={x:Static conv:TimerWidthConverter.Instance}}" />
                                     </Border>
                                 </StackPanel>
                             </Border>
