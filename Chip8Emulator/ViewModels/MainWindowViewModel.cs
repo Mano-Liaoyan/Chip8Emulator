@@ -76,6 +76,19 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
         set { field = value; OnPropertyChanged(); }
     } = 700.0;
 
+    public bool IsPaused
+    {
+        get;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(PauseButtonText));
+        }
+    }
+
+    public string PauseButtonText => IsPaused ? "RESUME" : "PAUSE";
+
     public string ProgramCounter
     {
         get;

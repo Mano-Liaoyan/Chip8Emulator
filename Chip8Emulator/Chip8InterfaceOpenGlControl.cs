@@ -37,6 +37,8 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
     private SoundPlayer? _soundPlayer;
     private double _timerAccumulator;
     private bool IsRomLoaded;
+    private string? _lastRomPath;
+    public bool IsPaused { get; set; }
 
     private long lastCycleTime;
     private int shaderProgram;
@@ -57,8 +59,19 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
     public void LoadRom(string path)
     {
+        _lastRomPath = path;
         Cpu.LoadROM(path);
         IsRomLoaded = true;
+        IsPaused = false;
+    }
+
+    public void ResetEmulator()
+    {
+        if (_lastRomPath != null)
+            Cpu.LoadROM(_lastRomPath);
+        else
+            Cpu.Reset();
+        IsPaused = false;
     }
 
     protected override void OpenTkInit()
@@ -142,46 +155,40 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
     {
         if (!IsRomLoaded) return;
 
-        // 1. Emulation Timing Logic
         ProcessInput();
-        long currentTime = stopwatch.ElapsedMilliseconds;
-        double deltaTime = currentTime - lastCycleTime;
-        lastCycleTime = currentTime;
 
-        // Cap deltaTime to avoid spiral of death
-        if (deltaTime > 100) deltaTime = 100;
-
-        _cpuAccumulator += deltaTime;
-        _timerAccumulator += deltaTime;
-
-        while (_cpuAccumulator >= CpuPeriod)
+        if (!IsPaused)
         {
-            Cpu.Cycle();
-            _cpuAccumulator -= CpuPeriod;
+            long currentTime = stopwatch.ElapsedMilliseconds;
+            double deltaTime = currentTime - lastCycleTime;
+            lastCycleTime = currentTime;
+
+            if (deltaTime > 100) deltaTime = 100;
+
+            _cpuAccumulator += deltaTime;
+            _timerAccumulator += deltaTime;
+
+            while (_cpuAccumulator >= CpuPeriod)
+            {
+                Cpu.Cycle();
+                _cpuAccumulator -= CpuPeriod;
+            }
+
+            while (_timerAccumulator >= TimerPeriod)
+            {
+                Cpu.UpdateTimers();
+                _timerAccumulator -= TimerPeriod;
+            }
+
+            if (Cpu.SoundTimer > 0) _soundPlayer?.Play();
+            else _soundPlayer?.Stop();
         }
 
-        while (_timerAccumulator >= TimerPeriod)
-        {
-            Cpu.UpdateTimers();
-            _timerAccumulator -= TimerPeriod;
-        }
-
-        if (Cpu.SoundTimer > 0)
-            _soundPlayer?.Play();
-        else
-            _soundPlayer?.Stop();
-
-
-        // 2. Rendering
         GL.Clear(ClearBufferMask.ColorBufferBit);
-
         GL.UseProgram(shaderProgram);
         GL.BindTexture(TextureTarget.Texture2D, textureHandle);
-
-        // Upload the video buffer
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
             64, 32, 0, PixelFormat.Rgba, PixelType.UnsignedByte, Cpu.video);
-
         GL.BindVertexArray(vaoHandle);
         GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
     }

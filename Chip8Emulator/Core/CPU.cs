@@ -143,7 +143,7 @@ public class CPU
         Keypad[index] = (byte)(pressed ? 1 : 0);
     }
 
-    private void Reset()
+    public void Reset()
     {
         PC = startAddress;
         Opcode = 0;

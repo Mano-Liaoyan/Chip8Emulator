@@ -26,15 +26,17 @@
                 <Border BorderBrush="#444" BorderThickness="1" CornerRadius="4" Padding="10" Background="#333">
                     <StackPanel Spacing="10">
                         <TextBlock Text="CONTROLS" Foreground="#888" FontWeight="Bold" FontSize="12" />
-                        <Grid ColumnDefinitions="*,*">
+                        <Grid ColumnDefinitions="*,*,*">
                             <Button Grid.Column="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                    Click="LoadRom_Click"
-                                    Background="#444" Foreground="White" Margin="0,0,5,0">
+                                    Click="LoadRom_Click" Background="#444" Foreground="White" Margin="0,0,3,0">
                                 LOAD ROM
                             </Button>
                             <Button Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                    Click="ShowHideControl" Background="#444" Foreground="White" Margin="5,0,0,0">
-                                TOGGLE GPU
+                                    Click="Pause_Click" Background="#444" Foreground="White" Margin="3,0,3,0"
+                                    Content="{Binding PauseButtonText}" />
+                            <Button Grid.Column="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Click="Reset_Click" Background="#444" Foreground="White" Margin="3,0,0,0">
+                                RESET
                             </Button>
                         </Grid>
                         <CheckBox Content="Shift Quirks (copy Vy)" Foreground="White"

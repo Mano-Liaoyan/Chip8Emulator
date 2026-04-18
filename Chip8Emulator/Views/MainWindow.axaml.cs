@@ -56,10 +56,23 @@ public partial class MainWindow : Window
             string filePath = files[0].Path.LocalPath;
             Chip8OpenGlControl.LoadRom(filePath);
             _viewModel.WindowTitle = $"Chip8Emulator - {files[0].Name}";
+            _viewModel.IsPaused = false;
         }
         catch (Exception exception)
         {
             await Console.Error.WriteLineAsync(exception.Message);
         }
+    }
+
+    private void Pause_Click(object? sender, RoutedEventArgs e)
+    {
+        _viewModel.IsPaused = !_viewModel.IsPaused;
+        Chip8OpenGlControl.IsPaused = _viewModel.IsPaused;
+    }
+
+    private void Reset_Click(object? sender, RoutedEventArgs e)
+    {
+        Chip8OpenGlControl.ResetEmulator();
+        _viewModel.IsPaused = false;
     }
 }
