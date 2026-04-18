@@ -42,6 +42,10 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
     private long lastCycleTime;
     private int shaderProgram;
+    private int _uForeground;
+    private int _uBackground;
+    public (float R, float G, float B) ForegroundColor { get; set; } = (1f, 1f, 1f);
+    public (float R, float G, float B) BackgroundColor { get; set; } = (0f, 0f, 0f);
 
     // OpenGL Objects
     private int textureHandle;
@@ -95,8 +99,11 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
                                                         out vec4 FragColor;
                                                         in vec2 TexCoord;
                                                         uniform sampler2D texture1;
+                                                        uniform vec4 uForeground;
+                                                        uniform vec4 uBackground;
                                                         void main() {
-                                                            FragColor = texture(texture1, TexCoord);
+                                                            float pixel = texture(texture1, TexCoord).r;
+                                                            FragColor = mix(uBackground, uForeground, step(0.5, pixel));
                                                         }
                                             """;
 
@@ -112,6 +119,8 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
         GL.AttachShader(shaderProgram, vertexShader);
         GL.AttachShader(shaderProgram, fragmentShader);
         GL.LinkProgram(shaderProgram);
+        _uForeground = GL.GetUniformLocation(shaderProgram, "uForeground");
+        _uBackground = GL.GetUniformLocation(shaderProgram, "uBackground");
 
         GL.DetachShader(shaderProgram, vertexShader);
         GL.DetachShader(shaderProgram, fragmentShader);
@@ -186,6 +195,8 @@ public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 
         GL.Clear(ClearBufferMask.ColorBufferBit);
         GL.UseProgram(shaderProgram);
+        GL.Uniform4(_uForeground, ForegroundColor.R, ForegroundColor.G, ForegroundColor.B, 1.0f);
+        GL.Uniform4(_uBackground, BackgroundColor.R, BackgroundColor.G, BackgroundColor.B, 1.0f);
         GL.BindTexture(TextureTarget.Texture2D, textureHandle);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
             64, 32, 0, PixelFormat.Rgba, PixelType.UnsignedByte, Cpu.video);

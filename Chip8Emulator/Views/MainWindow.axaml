@@ -53,6 +53,19 @@
                             <Slider Minimum="60" Maximum="2000" Value="{Binding CpuFrequency}"
                                     TickFrequency="100" IsSnapToTickEnabled="False" />
                         </StackPanel>
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="COLOR PALETTE" Foreground="#888" FontWeight="Bold" FontSize="12" />
+                            <ComboBox ItemsSource="{Binding Palettes}"
+                                      SelectedItem="{Binding SelectedPalette}"
+                                      HorizontalAlignment="Stretch"
+                                      Background="#444" Foreground="White">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:MainWindowViewModel+ColorPalette">
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 

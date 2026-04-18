@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Chip8Emulator.Core;
@@ -34,6 +35,31 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
         string[] labels = ["1", "2", "3", "C", "4", "5", "6", "D", "7", "8", "9", "E", "A", "0", "B", "F"];
 
         for (int i = 0; i < 16; i++) Keypad.Add(new RegisterItem { Name = labels[i], Value = "False" });
+
+        SelectedPalette = Palettes[0];
+    }
+
+    public record ColorPalette(string Name,
+        float FgR, float FgG, float FgB,
+        float BgR, float BgG, float BgB);
+
+    public List<ColorPalette> Palettes { get; } =
+    [
+        new("Classic B&W",    1.0f, 1.0f, 1.0f,  0.0f, 0.0f, 0.0f),
+        new("Green Phosphor", 0.0f, 1.0f, 0.2f,  0.0f, 0.1f, 0.0f),
+        new("Amber",          1.0f, 0.7f, 0.0f,  0.1f, 0.05f, 0.0f),
+        new("Blue LCD",       0.4f, 0.8f, 1.0f,  0.0f, 0.05f, 0.15f),
+        new("Inverted",       0.0f, 0.0f, 0.0f,  1.0f, 1.0f, 1.0f),
+    ];
+
+    public ColorPalette SelectedPalette
+    {
+        get;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
     }
 
     public ObservableCollection<RegisterItem> Registers { get; } = [];

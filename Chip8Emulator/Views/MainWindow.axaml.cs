@@ -28,6 +28,12 @@ public partial class MainWindow : Window
                 Chip8OpenGlControl.Cpu.ShiftUsesVy = _viewModel.ShiftQuirksEnabled;
             if (e.PropertyName == nameof(MainWindowViewModel.CpuFrequency))
                 Chip8OpenGlControl.CpuFrequency = _viewModel.CpuFrequency;
+            if (e.PropertyName == nameof(MainWindowViewModel.SelectedPalette))
+            {
+                var p = _viewModel.SelectedPalette;
+                Chip8OpenGlControl.ForegroundColor = (p.FgR, p.FgG, p.FgB);
+                Chip8OpenGlControl.BackgroundColor = (p.BgR, p.BgG, p.BgB);
+            }
         };
     }
 
