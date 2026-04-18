@@ -595,6 +595,7 @@ public class CPU
                 if (Keypad[i] != 0)
                 {
                     _waitingForKeyRelease = i;
+                    // Latch the key value now (when first detected) — Phase 2 only waits for release
                     Registers[x] = i;
                     break;
                 }

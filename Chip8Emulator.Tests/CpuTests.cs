@@ -61,4 +61,18 @@ public class CpuTests
         Assert.Equal(0x202, cpu.PC);
         Assert.Equal(3, cpu.Registers[0]);
     }
+
+    [Fact]
+    public void OP_Fx0A_DoesNotAdvance_WhenNoKeyPressed()
+    {
+        var cpu = CreateCpu(0xF0, 0x0A);
+
+        // No keys pressed — must stay on this instruction across multiple cycles
+        cpu.Cycle();
+        Assert.Equal(0x200, cpu.PC);
+        cpu.Cycle();
+        Assert.Equal(0x200, cpu.PC);
+        cpu.Cycle();
+        Assert.Equal(0x200, cpu.PC);
+    }
 }
