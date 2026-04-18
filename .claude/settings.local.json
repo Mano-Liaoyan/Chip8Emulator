@@ -3,7 +3,10 @@
     "allow": [
       "Bash(dotnet build *)",
       "Bash(dotnet sln add *)",
-      "Bash(dotnet test *)"
+      "Bash(dotnet test *)",
+      "Bash(dotnet clean *)",
+      "Bash(dotnet -v)",
+      "Bash(git diff *)"
     ]
   }
 }

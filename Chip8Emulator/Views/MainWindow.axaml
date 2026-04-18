@@ -278,8 +278,15 @@
             Width="2"
             ResizeDirection="Columns"
             Background="#ccc" />
-        <Panel Grid.Column="2" IsVisible="{Binding ShowOpenGlControl}">
-            <chip8Emulator:Chip8InterfaceOpenGlControl x:Name="Chip8OpenGlControl" Focusable="True" />
+        <Panel Grid.Column="2" IsVisible="{Binding ShowOpenGlControl}"
+               Background="#111">
+            <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <chip8Emulator:Chip8InterfaceOpenGlControl
+                    x:Name="Chip8OpenGlControl"
+                    Focusable="True"
+                    Width="640"
+                    Height="320" />
+            </Viewbox>
         </Panel>
     </Grid>
 </Window>
