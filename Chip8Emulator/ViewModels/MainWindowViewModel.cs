@@ -70,56 +70,50 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
         }
     } = false;
 
-    public string ProgramCounter { get; set; } = "0000";
+    public string ProgramCounter
+    {
+        get;
+        set { field = value; OnPropertyChanged(); }
+    } = "0000";
 
-    public string IndexRegister { get; set; } = "0000";
+    public string IndexRegister
+    {
+        get;
+        set { field = value; OnPropertyChanged(); }
+    } = "0000";
 
-    public string Opcode { get; set; } = "0000";
+    public string Opcode
+    {
+        get;
+        set { field = value; OnPropertyChanged(); }
+    } = "0000";
 
-    public string StackPointer { get; set; } = "00";
+    public string StackPointer
+    {
+        get;
+        set { field = value; OnPropertyChanged(); }
+    } = "00";
 
-    public string DelayTimer { get; set; } = "00";
+    public string DelayTimer
+    {
+        get;
+        set { field = value; OnPropertyChanged(); }
+    } = "00";
 
-    public string SoundTimer { get; set; } = "00";
+    public string SoundTimer
+    {
+        get;
+        set { field = value; OnPropertyChanged(); }
+    } = "00";
 
     public void UpdateCpuState(CPU cpu)
     {
-        // ... existing updates ...
-        if (ProgramCounter != cpu.PC.ToString("X4"))
-        {
-            ProgramCounter = cpu.PC.ToString("X4");
-            OnPropertyChanged(nameof(ProgramCounter));
-        }
-
-        if (IndexRegister != cpu.I.ToString("X4"))
-        {
-            IndexRegister = cpu.I.ToString("X4");
-            OnPropertyChanged(nameof(IndexRegister));
-        }
-
-        if (Opcode != cpu.Opcode.ToString("X4"))
-        {
-            Opcode = cpu.Opcode.ToString("X4");
-            OnPropertyChanged(nameof(Opcode));
-        }
-
-        if (StackPointer != cpu.SP.ToString("X2"))
-        {
-            StackPointer = cpu.SP.ToString("X2");
-            OnPropertyChanged(nameof(StackPointer));
-        }
-
-        if (DelayTimer != cpu.DelayTimer.ToString("X2"))
-        {
-            DelayTimer = cpu.DelayTimer.ToString("X2");
-            OnPropertyChanged(nameof(DelayTimer));
-        }
-
-        if (SoundTimer != cpu.SoundTimer.ToString("X2"))
-        {
-            SoundTimer = cpu.SoundTimer.ToString("X2");
-            OnPropertyChanged(nameof(SoundTimer));
-        }
+        ProgramCounter = cpu.PC.ToString("X4");
+        IndexRegister = cpu.I.ToString("X4");
+        Opcode = cpu.Opcode.ToString("X4");
+        StackPointer = cpu.SP.ToString("X2");
+        DelayTimer = cpu.DelayTimer.ToString("X2");
+        SoundTimer = cpu.SoundTimer.ToString("X2");
 
         for (int i = 0; i < 16; i++)
         {
@@ -127,34 +121,20 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
             if (Registers[i].Value != newVal) Registers[i].Value = newVal;
         }
 
-        // Update Keypad
         int[] displayOrder = [0x1, 0x2, 0x3, 0xC, 0x4, 0x5, 0x6, 0xD, 0x7, 0x8, 0x9, 0xE, 0xA, 0x0, 0xB, 0xF];
         for (int i = 0; i < 16; i++)
         {
-            int cpuKeyIndex = displayOrder[i];
-            bool isPressed = cpu.Keypad[cpuKeyIndex] != 0;
+            bool isPressed = cpu.Keypad[displayOrder[i]] != 0;
             if (Keypad[i].IsActive != isPressed) Keypad[i].IsActive = isPressed;
         }
 
-        // Update Stack
-        // The stack grows from 0 to SP. Valid items are 0 to SP-1.
         int sp = cpu.SP;
-
-        // Remove items if current stack is larger than SP
         while (Stack.Count > sp) Stack.RemoveAt(Stack.Count - 1);
-
-        // Add items if current stack is smaller than SP
-        while (Stack.Count < sp)
-            // Add placeholder, will be updated below
-            Stack.Add("0000");
-
-        // Update values
+        while (Stack.Count < sp) Stack.Add("0000");
         for (int i = 0; i < sp; i++)
         {
             string newVal = cpu.Stack[i].ToString("X4");
-            if (Stack[i] == newVal) continue;
-
-            Stack[i] = newVal;
+            if (Stack[i] != newVal) Stack[i] = newVal;
         }
     }
 
