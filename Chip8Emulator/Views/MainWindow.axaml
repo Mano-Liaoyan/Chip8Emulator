@@ -39,6 +39,18 @@
                         </Grid>
                         <CheckBox Content="Shift Quirks (copy Vy)" Foreground="White"
                                   IsChecked="{Binding ShiftQuirksEnabled}" />
+                        <StackPanel Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="CPU SPEED" Foreground="#888" FontWeight="Bold" FontSize="12"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Foreground="#DDD" FontFamily="Consolas, Monospace" FontSize="12">
+                                    <Run Text="{Binding CpuFrequency, StringFormat={}{0:F0}}" />
+                                    <Run Text=" Hz" />
+                                </TextBlock>
+                            </Grid>
+                            <Slider Minimum="60" Maximum="2000" Value="{Binding CpuFrequency}"
+                                    TickFrequency="100" IsSnapToTickEnabled="False" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 

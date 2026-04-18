@@ -9,10 +9,18 @@ namespace Chip8Emulator;
 
 public class Chip8InterfaceOpenGlControl : BaseTkOpenGlControl
 {
-    private const double CpuFrequency = 700.0;
     private const double TimerFrequency = 60.0;
-    private const double CpuPeriod = 1000.0 / CpuFrequency;
     private const double TimerPeriod = 1000.0 / TimerFrequency;
+
+    private double _cpuFrequency = 700.0;
+
+    public double CpuFrequency
+    {
+        get => _cpuFrequency;
+        set => _cpuFrequency = Math.Clamp(value, 60.0, 2000.0);
+    }
+
+    private double CpuPeriod => 1000.0 / _cpuFrequency;
     private readonly Stopwatch stopwatch;
 
     private readonly float[] vertices =

@@ -26,6 +26,8 @@ public partial class MainWindow : Window
         {
             if (e.PropertyName == nameof(MainWindowViewModel.ShiftQuirksEnabled))
                 Chip8OpenGlControl.Cpu.ShiftUsesVy = _viewModel.ShiftQuirksEnabled;
+            if (e.PropertyName == nameof(MainWindowViewModel.CpuFrequency))
+                Chip8OpenGlControl.CpuFrequency = _viewModel.CpuFrequency;
         };
     }
 

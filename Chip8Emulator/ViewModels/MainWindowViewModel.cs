@@ -70,6 +70,12 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
         }
     } = false;
 
+    public double CpuFrequency
+    {
+        get;
+        set { field = value; OnPropertyChanged(); }
+    } = 700.0;
+
     public string ProgramCounter
     {
         get;
