@@ -129,6 +129,8 @@ public class CPU
     /// </summary>
     public ushort PC { get; private set; }
 
+    public bool ShiftUsesVy { get; set; } = false;
+
     public byte SoundTimer { get; private set; }
 
     /// <summary>
@@ -415,16 +417,15 @@ public class CPU
     }
 
     /// <summary>
-    ///     Set Vx = Vx SHR 1
+    ///     Set Vx = Vx SHR 1 (or Vy SHR 1 if ShiftUsesVy)
     /// </summary>
     private void OP_8xy6()
     {
         byte x = (byte)((Opcode & 0x0F00) >> 8);
-
-        // Save LSB in VF
-        Registers[0xF] = (byte)(Registers[x] & 0x1);
-
-        Registers[x] >>= 1;
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
+        byte val = ShiftUsesVy ? Registers[y] : Registers[x];
+        Registers[0xF] = (byte)(val & 0x1);
+        Registers[x] = (byte)(val >> 1);
     }
 
     /// <summary>
@@ -444,18 +445,15 @@ public class CPU
     }
 
     /// <summary>
-    ///     Set Vx = Vx SHL 1
+    ///     Set Vx = Vx SHL 1 (or Vy SHL 1 if ShiftUsesVy)
     /// </summary>
     private void OP_8xyE()
     {
         byte x = (byte)((Opcode & 0x0F00) >> 8);
-
-        // Save the Most Significant Bit (MSB) in VF
-        // 0x80 is 10000000 in binary. We mask it and shift it 7 places right 
-        // to get a simple 0 or 1.
-        Registers[0xF] = (byte)((Registers[x] & 0x80) >> 7);
-
-        Registers[x] <<= 1;
+        byte y = (byte)((Opcode & 0x00F0) >> 4);
+        byte val = ShiftUsesVy ? Registers[y] : Registers[x];
+        Registers[0xF] = (byte)((val & 0x80) >> 7);
+        Registers[x] = (byte)(val << 1);
     }
 
     /// <summary>

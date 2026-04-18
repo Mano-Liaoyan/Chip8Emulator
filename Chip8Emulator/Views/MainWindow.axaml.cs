@@ -21,6 +21,12 @@ public partial class MainWindow : Window
         };
         timer.Tick += (s, e) => _viewModel.UpdateCpuState(Chip8OpenGlControl.Cpu);
         timer.Start();
+
+        _viewModel.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(MainWindowViewModel.ShiftQuirksEnabled))
+                Chip8OpenGlControl.Cpu.ShiftUsesVy = _viewModel.ShiftQuirksEnabled;
+        };
     }
 
 

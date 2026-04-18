@@ -75,4 +75,40 @@ public class CpuTests
         cpu.Cycle();
         Assert.Equal(0x200, cpu.PC);
     }
+
+    [Fact]
+    public void OP_8xy6_WithShiftUsesVy_False_ShiftsVx()
+    {
+        var cpu = CreateCpu(0x86, 0x16); // SHR V6, (V1 ignored)
+        cpu.Registers[6] = 0b00000110;
+        cpu.Registers[1] = 0b11110000; // V1 should be ignored
+        cpu.ShiftUsesVy = false;
+        cpu.Cycle();
+        Assert.Equal(0b00000011, cpu.Registers[6]);
+        Assert.Equal(0, cpu.Registers[0xF]); // LSB was 0
+    }
+
+    [Fact]
+    public void OP_8xy6_WithShiftUsesVy_True_CopiesVyThenShifts()
+    {
+        var cpu = CreateCpu(0x86, 0x16); // SHR V6, V1
+        cpu.Registers[6] = 0b11110000; // will be overwritten by Vy
+        cpu.Registers[1] = 0b00000110; // Vy
+        cpu.ShiftUsesVy = true;
+        cpu.Cycle();
+        Assert.Equal(0b00000011, cpu.Registers[6]); // shifted from V1
+        Assert.Equal(0, cpu.Registers[0xF]);
+    }
+
+    [Fact]
+    public void OP_8xyE_WithShiftUsesVy_True_CopiesVyThenShifts()
+    {
+        var cpu = CreateCpu(0x86, 0x1E); // SHL V6, V1
+        cpu.Registers[6] = 0b11110000;
+        cpu.Registers[1] = 0b10000001; // Vy: MSB=1, will be shifted out
+        cpu.ShiftUsesVy = true;
+        cpu.Cycle();
+        Assert.Equal(0b00000010, cpu.Registers[6]);
+        Assert.Equal(1, cpu.Registers[0xF]); // MSB was 1
+    }
 }

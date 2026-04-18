@@ -36,6 +36,8 @@
                                 TOGGLE GPU
                             </Button>
                         </Grid>
+                        <CheckBox Content="Shift Quirks (copy Vy)" Foreground="White"
+                                  IsChecked="{Binding ShiftQuirksEnabled}" />
                     </StackPanel>
                 </Border>
 

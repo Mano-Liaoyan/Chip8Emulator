@@ -62,6 +62,16 @@ public class MainWindowViewModel : EasyNotifyPropertyChanged
         }
     } = "Chip8Emulator";
 
+    public bool ShiftQuirksEnabled
+    {
+        get;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    } = false;
+
     public string ProgramCounter { get; set; } = "0000";
 
     public string IndexRegister { get; set; } = "0000";
